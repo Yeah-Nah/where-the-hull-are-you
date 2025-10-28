@@ -27,25 +27,27 @@ def detect_boats(image_path, output_path=None, confidence_threshold=0.5):
     
     # Run inference
     # Class 8 in COCO dataset is 'boat'
-    results = model(image, conf=confidence_threshold)
+    results = model(image, conf=confidence_threshold, classes=[8])
     
     # Extract boat detections
     boat_detections = []
     for result in results:
         boxes = result.boxes
-        for box in boxes:
-            class_id = int(box.cls[0])
-            confidence = float(box.conf[0])
-            
-            # Filter for boats (class 8 in COCO dataset)
-            if class_id == 8:
-                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-                boat_detections.append({
-                    'bbox': [int(x1), int(y1), int(x2), int(y2)],
-                    'confidence': confidence,
-                    'class_id': class_id,
-                    'class_name': 'boat'
-                })
+        # Check if any detections were found
+        if boxes is not None and len(boxes) > 0:
+            for box in boxes:
+                class_id = int(box.cls[0])
+                confidence = float(box.conf[0])
+                
+                # Filter for boats (class 8 in COCO dataset)
+                if class_id == 8:
+                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                    boat_detections.append({
+                        'bbox': [int(x1), int(y1), int(x2), int(y2)],
+                        'confidence': confidence,
+                        'class_id': class_id,
+                        'class_name': 'boat'
+                    })
     
     # Save annotated image if output path provided
     if output_path and len(boat_detections) > 0:
