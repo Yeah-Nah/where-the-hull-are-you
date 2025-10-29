@@ -1,10 +1,16 @@
 # where-the-hull-are-you
-Basic boat detection and tracking using open-source models.
+Basic boat detection and tracking using open-source models. The goal of this project is to teach me the basics of robotics, and expand my Data Science and ML experience into the image recognition realm.
 
-## Overview
-This project provides simple Python scripts to detect and track boats in images and videos using YOLOv8, a state-of-the-art object detection model.
+## Project Goal:
+Develop a program that can identify and track and object real time, using data from multiple sensor sources (cameras, radar, Lidar, IMUs).
 
-Perfect for learning computer vision and object tracking!
+### Learning Goals:
+Inspiration taken from the Greenroom Robotics Senior ML / Robotics Enigneer Role
+- ROS2
+- Sensor fusion algorithms for data from multiple sources
+- Containerisation and dockerisation tools
+- OAK-D
+- Lidar sensors
 
 ## Features
 - **Boat Detection**: Identify boats in still images
