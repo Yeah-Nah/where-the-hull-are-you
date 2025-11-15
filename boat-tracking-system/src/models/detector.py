@@ -1,6 +1,6 @@
+from ultralytics import YOLO
 class Detector:
     def __init__(self, model_path, confidence_threshold=0.5):
-        from ultralytics import YOLO
         self.model = YOLO(model_path)
         self.confidence_threshold = confidence_threshold
 
