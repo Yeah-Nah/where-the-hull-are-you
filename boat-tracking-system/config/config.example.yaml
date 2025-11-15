@@ -1,0 +1,9 @@
+# Contents of /boat-tracking-system/boat-tracking-system/config/config.example.yaml
+
+input_directory: "data/input"
+output_directory: "data/output"
+model_path: "models/yolov8n.pt"
+confidence_threshold: 0.5
+boat_classes:
+  - "boat"
+  - "ship"
