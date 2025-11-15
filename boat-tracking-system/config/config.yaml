@@ -2,8 +2,3 @@
 
 input_directory: "E:/01_personal_project/input"
 output_directory: "E:/01_personal_project/output"
-model_path: "models/yolov8n.pt"
-confidence_threshold: 0.1
-boat_classes:
-  - "boat"
-  - "ship"
