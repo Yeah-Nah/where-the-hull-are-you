@@ -17,3 +17,6 @@ CONFIDENCE_THRESHOLD = config.get('confidence_threshold', 0.5)
 # Input and output directories
 INPUT_DIR = config.get("input_directory", "")
 OUTPUT_DIR = config.get("output_directory", "")
+
+# Boat classes to detect
+BOAT_CLASSES = config.get("boat_classes", ["boat", "ship"])
