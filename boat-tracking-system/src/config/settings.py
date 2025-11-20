@@ -14,7 +14,7 @@ with open(CONFIG_FILE) as f:
 
 # Input and output directories
 INPUT_DIR = config.get("input_directory", "")
-INPUT_PREPROCESSED_DIR = config.get("input_preprocessed_directory", "")
+INPUT_PREPROCESSED_DIR = INPUT_DIR / "preprocessed"
 OUTPUT_DIR = config.get("output_directory", "")
 
 # Model configuration settngs
