@@ -1,4 +1,5 @@
 # Contents of /boat-tracking-system/boat-tracking-system/config/config.yaml
 
 input_directory: "E:/01_personal_project/input"
+input_preprocessed_directory: "E:/01_personal_project/input_test/preprocessed"
 output_directory: "E:/01_personal_project/output"
