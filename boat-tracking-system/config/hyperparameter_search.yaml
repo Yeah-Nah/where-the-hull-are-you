@@ -5,7 +5,7 @@ search_type: grid
 
 parameters:
   # Detection confidence threshold
-  confidence_threshold: [0.1]
+  confidence_threshold: [0.1, 0.2]
   
   # Video preprocessing target height
   target_height: [720]
