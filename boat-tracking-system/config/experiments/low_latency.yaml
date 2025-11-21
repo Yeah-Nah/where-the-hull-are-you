@@ -1,0 +1,27 @@
+# Low Latency Experiment Configuration
+# Optimized for speed with lower resolution and relaxed thresholds
+
+experiment_name: low_latency
+
+# Lower detection confidence for faster processing
+confidence_threshold: 0.4
+
+# Lower target height for faster processing
+target_height: 480
+
+# Tracker type
+tracker_type: botsort
+
+# BOTSORT tracker configuration
+botsort_config:
+  # Lower track confidence threshold
+  track_thresh: 0.4
+  
+  # Shorter track buffer for faster response
+  track_buffer: 20
+  
+  # Lower matching threshold
+  match_thresh: 0.75
+  
+  # Detection threshold
+  det_thresh: 0.4

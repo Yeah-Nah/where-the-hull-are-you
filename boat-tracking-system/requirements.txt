@@ -2,7 +2,8 @@ numpy>=1.24.0
 opencv-python>=4.8.1.78
 ultralytics>=8.0.0
 loguru>=0.7.0
-PyYAML
+PyYAML>=6.0
 matplotlib
 ipython
 jupyter
+mlflow>=2.10.0

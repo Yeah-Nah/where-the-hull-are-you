@@ -157,7 +157,7 @@ class VideoPreprocessor:
         
         logger.info(f"\nFound {len(videos_to_process)} video(s) to process:")
         for video in sorted(videos_to_process):
-            logger.info(f"  - {video}")
+            logger.info(f"{video}")
         
         stats = {
             'total': len(videos_to_process),

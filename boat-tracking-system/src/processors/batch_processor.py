@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 from src.processors.video_processor import VideoProcessor
+from src.metrics.metrics_aggregator import MetricsAggregator
+from src.metrics.video_metrics_collector import VideoMetricsCollector
 
 class BatchProcessor:
     """Batch process video files in the given input folder location.
@@ -15,12 +17,16 @@ class BatchProcessor:
         Pre-loaded object detector (e.g., BoatDetector instance).
     tracker : object
         Pre-loaded object tracker (e.g., BoatTracker instance).
+    collect_metrics : bool, optional
+        Whether to collect metrics during processing (default: False).
     """
-    def __init__(self, input_dir, output_dir, detector, tracker):
+    def __init__(self, input_dir, output_dir, detector, tracker, collect_metrics=False):
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.detector = detector
         self.tracker = tracker
+        self.collect_metrics = collect_metrics
+        self.metrics_aggregator = MetricsAggregator() if collect_metrics else None
         
         # Create output directory if it doesn't exist
         Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -43,16 +49,35 @@ class BatchProcessor:
             output_filename = f"{name}_processed{ext}"
             output_path = os.path.join(self.output_dir, output_filename)
             
+            # Create metrics collector if enabled
+            metrics_collector = VideoMetricsCollector(video_file) if self.collect_metrics else None
+            
             # Create video processor and process
             video_processor = VideoProcessor(
                 input_path=input_path,
                 output_path=output_path,
                 detector=self.detector,
-                tracker=self.tracker
+                tracker=self.tracker,
+                metrics_collector=metrics_collector
             )
             video_processor.process_video()
             print(f"✓ Saved to: {output_path}")
+            
+            # Collect video metrics if enabled
+            if self.collect_metrics and metrics_collector:
+                video_metrics = metrics_collector.compute_video_metrics()
+                self.metrics_aggregator.add_video_metrics(video_file, video_metrics)
+                print(f"✓ Metrics collected for {video_file}")
 
     def run(self):
         """Run the batch processing."""
         self.process_videos()
+        
+        if self.collect_metrics:
+            aggregated_metrics = self.metrics_aggregator.compute_aggregated_metrics()
+            print("\n" + "="*60)
+            print(self.metrics_aggregator.get_summary_string())
+            print("="*60)
+            return aggregated_metrics
+        
+        return None
