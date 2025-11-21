@@ -5,10 +5,10 @@ search_type: grid
 
 parameters:
   # Detection confidence threshold
-  confidence_threshold: [0.3, 0.5, 0.7]
+  confidence_threshold: [0.1]
   
   # Video preprocessing target height
-  target_height: [480, 720, 1080]
+  target_height: [720]
   
   # Tracker type (currently only botsort supported)
   tracker_type: botsort
@@ -16,16 +16,17 @@ parameters:
   # BOTSORT tracker configuration parameters
   botsort_config:
     # Track confidence threshold
-    track_thresh: [0.25, 0.5, 0.75]
-    
-    # Number of frames to keep lost tracks
-    track_buffer: [30, 60, 90]
-    
-    # Matching threshold for data association
-    match_thresh: [0.7, 0.8, 0.9]
-    
-    # Detection threshold (typically same as confidence_threshold)
-    # det_thresh: [0.3, 0.5, 0.7]
+    track_high_thresh: [0.25] # (float) First-stage match threshold; raise for cleaner tracks, lower to keep more
+    track_low_thresh: [0.1] # (float) Second-stage threshold for low-score matches; balances recovery vs drift
+    new_track_thresh: [0.25] # (float) Start a new track if no match ≥ this; higher reduces false tracks
+    track_buffer: [30, 90] # (int) Frames to keep lost tracks alive; higher handles occlusion, increases ID switches risk
+    match_thresh: [0.8] # (float) Association similarity threshold (IoU/cost); tune with detector quality
+    fuse_score: [True] # (bool) Fuse detection score with motion/IoU for matching; stabilizes weak detections
+    # BoT-SORT specifics
+    gmc_method: [sparseOptFlow] # (str) Global motion compensation: sparseOptFlow|orb|none; helps moving camera scenes
 
-# Note: The above configuration will generate 3 x 3 x 3 x 3 x 3 = 243 experiment runs
-# Consider reducing the parameter space for faster experimentation
+    # ReID model related thresh
+    proximity_thresh: [0.5] # (float) Min IoU to consider tracks proximate for ReID; higher is stricter
+    appearance_thresh: [0.4] # (float) Min appearance similarity for ReID; raise to avoid identity swaps
+    with_reid: [False] # (bool) Enable ReID model use; needs extra model and compute
+    model: [auto] # (str) ReID model name/path; "auto" uses detector features if available

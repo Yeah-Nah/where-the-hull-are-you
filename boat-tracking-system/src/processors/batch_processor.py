@@ -3,6 +3,7 @@ from pathlib import Path
 from src.processors.video_processor import VideoProcessor
 from src.metrics.metrics_aggregator import MetricsAggregator
 from src.metrics.video_metrics_collector import VideoMetricsCollector
+from loguru import logger
 
 class BatchProcessor:
     """Batch process video files in the given input folder location.
@@ -37,10 +38,10 @@ class BatchProcessor:
         video_files = [f for f in os.listdir(self.input_dir) 
                       if f.lower().endswith(video_extensions)]
         
-        print(f"Found {len(video_files)} video files to process")
+        logger.info(f"Found {len(video_files)} video files to process")
         
         for i, video_file in enumerate(video_files, 1):
-            print(f"\nProcessing {i}/{len(video_files)}: {video_file}")
+            logger.info(f"\nProcessing {i}/{len(video_files)}: {video_file}")
             
             input_path = os.path.join(self.input_dir, video_file)
             
@@ -61,13 +62,13 @@ class BatchProcessor:
                 metrics_collector=metrics_collector
             )
             video_processor.process_video()
-            print(f"✓ Saved to: {output_path}")
+            logger.info(f"✓ Saved to: {output_path}")
             
             # Collect video metrics if enabled
             if self.collect_metrics and metrics_collector:
                 video_metrics = metrics_collector.compute_video_metrics()
                 self.metrics_aggregator.add_video_metrics(video_file, video_metrics)
-                print(f"✓ Metrics collected for {video_file}")
+                logger.info(f"✓ Metrics collected for {video_file}")
 
     def run(self):
         """Run the batch processing."""
@@ -75,9 +76,9 @@ class BatchProcessor:
         
         if self.collect_metrics:
             aggregated_metrics = self.metrics_aggregator.compute_aggregated_metrics()
-            print("\n" + "="*60)
-            print(self.metrics_aggregator.get_summary_string())
-            print("="*60)
+            logger.info("\n" + "="*60)
+            logger.info(self.metrics_aggregator.get_summary_string())
+            logger.info("="*60)
             return aggregated_metrics
         
         return None

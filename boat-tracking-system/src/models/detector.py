@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+from loguru import logger
 
 class Detector:
     def __init__(self, model_path, confidence_threshold=0.5, target_classes=None):
@@ -26,8 +27,8 @@ class Detector:
                 class_id for class_id, class_name in self.model.names.items()
                 if class_name in target_classes
             ]
-            print(f"Filtering for classes: {target_classes}")
-            print(f"Class IDs: {self.target_class_ids}")
+            logger.info(f"Filtering for classes: {target_classes}")
+            logger.info(f"Class IDs: {self.target_class_ids}")
 
     def detect(self, frame):
         """Detect objects in a single frame (no tracking)."""

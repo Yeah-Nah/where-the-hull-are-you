@@ -1,5 +1,6 @@
 import cv2
 import time
+from loguru import logger
 
 class VideoProcessor:
     def __init__(self, input_path, output_path, detector, tracker, metrics_collector=None):
@@ -26,7 +27,7 @@ class VideoProcessor:
 
         frame_count = 0
         start_time = time.time()
-        print(f"Processing {total_frames} frames...")
+        logger.info(f"Processing {total_frames} frames...")
         
         while True:
             ret, frame = cap.read()
@@ -58,7 +59,7 @@ class VideoProcessor:
             out.write(tracked_frame)
             
             if frame_count % 30 == 0:
-                print(f"  Processed {frame_count}/{total_frames} frames...")
+                logger.info(f"  Processed {frame_count}/{total_frames} frames...")
 
         # Record total processing time
         if self.metrics_collector:
@@ -67,7 +68,7 @@ class VideoProcessor:
 
         cap.release()
         out.release()
-        print(f"✓ Completed: {frame_count} frames processed")
+        logger.info(f"✓ Completed: {frame_count} frames processed")
     
     def _extract_detections_from_results(self, results, frame_shape):
         """Extract detection info from YOLO results."""

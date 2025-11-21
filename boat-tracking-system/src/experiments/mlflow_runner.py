@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from itertools import product
 import json
+from loguru import logger
 
 from src.models.detector import Detector
 from src.models.tracker import Tracker
@@ -34,8 +35,8 @@ class MLflowRunner:
         """Initialize MLflow experiment."""
         mlflow.set_tracking_uri(self.tracking_uri)
         mlflow.set_experiment(self.experiment_name)
-        print(f"MLflow experiment set: {self.experiment_name}")
-        print(f"Tracking URI: {self.tracking_uri}")
+        logger.info(f"MLflow experiment set: {self.experiment_name}")
+        logger.info(f"Tracking URI: {self.tracking_uri}")
     
     def load_hyperparameter_config(self, config_path: str) -> Dict[str, Any]:
         """
@@ -81,8 +82,8 @@ class MLflowRunner:
         boat_classes = boat_classes or ["boat", "ship"]
         
         with mlflow.start_run(run_name=run_name):
-            print(f"\nStarting MLflow run: {run_name or 'unnamed'}")
-            print("="*60)
+            logger.info(f"\nStarting MLflow run: {run_name or 'unnamed'}")
+            logger.info("="*60)
             
             # Log hyperparameters
             self.log_hyperparameters(hyperparameters)
@@ -95,7 +96,7 @@ class MLflowRunner:
             
             # Preprocess videos if needed
             if 'preprocess' in hyperparameters and hyperparameters['preprocess']:
-                print(f"Preprocessing videos to height {target_height}...")
+                logger.info(f"Preprocessing videos to height {target_height}...")
                 preprocessor = VideoPreprocessor(
                     input_dir=hyperparameters.get('raw_input_dir', input_dir),
                     output_dir=input_dir,
@@ -124,10 +125,10 @@ class MLflowRunner:
                 collect_metrics=True
             )
             
-            print(f"Processing videos with hyperparameters:")
-            print(f"  Confidence: {confidence_threshold}")
-            print(f"  Tracker: {tracker_type}")
-            print(f"  BOTSORT config: {botsort_config}")
+            logger.info(f"Processing videos with hyperparameters:")
+            logger.info(f"  Confidence: {confidence_threshold}")
+            logger.info(f"  Tracker: {tracker_type}")
+            logger.info(f"  BOTSORT config: {botsort_config}")
             
             metrics = batch_processor.run()
             
@@ -141,8 +142,8 @@ class MLflowRunner:
                     json.dump(metrics['per_video'], f, indent=2)
                 mlflow.log_artifact(str(per_video_path))
             
-            print("="*60)
-            print(f"✓ MLflow run completed")
+            logger.info("="*60)
+            logger.info(f"✓ MLflow run completed")
             
             return metrics
     
@@ -211,40 +212,65 @@ class MLflowRunner:
         
         # Handle nested botsort_config
         botsort_params = parameters.get('botsort_config', {})
-        track_threshs = botsort_params.get('track_thresh', [0.5])
+        track_high_threshs = botsort_params.get('track_high_thresh', [0.5])
+        track_low_threshs = botsort_params.get('track_low_thresh', [0.1])
+        new_track_threshs = botsort_params.get('new_track_thresh', [0.4])
         track_buffers = botsort_params.get('track_buffer', [30])
         match_threshs = botsort_params.get('match_thresh', [0.8])
+        fuse_scores = botsort_params.get('fuse_score', [True])
+        gmc_methods = botsort_params.get('gmc_method', ['sparseOptFlow'])
+        proximity_threshs = botsort_params.get('proximity_thresh', [0.5])
+        appearance_threshs = botsort_params.get('appearance_thresh', [0.25])
+        with_reids = botsort_params.get('with_reid', [False])
+        models = botsort_params.get('model', ['auto'])
         
         # Generate all combinations
         combinations = list(product(
             confidence_thresholds,
             target_heights,
-            track_threshs,
+            track_high_threshs,
+            track_low_threshs,
+            new_track_threshs,
             track_buffers,
-            match_threshs
+            match_threshs,
+            fuse_scores,
+            gmc_methods,
+            proximity_threshs,
+            appearance_threshs,
+            with_reids,
+            models
         ))
         
-        print(f"Running grid search with {len(combinations)} combinations")
+        logger.info(f"Running grid search with {len(combinations)} combinations")
         
         all_results = []
         
-        for i, (conf, height, track_th, track_buf, match_th) in enumerate(combinations, 1):
+        for i, (conf, height, track_high_th, track_low_th, new_track_th, track_buf, 
+                match_th, fuse_score, gmc_method, prox_th, appear_th, with_reid, model) in enumerate(combinations, 1):
             hyperparams = {
                 'confidence_threshold': conf,
                 'target_height': height,
                 'tracker_type': 'botsort',
                 'botsort_config': {
-                    'track_thresh': track_th,
+                    'track_high_thresh': track_high_th,
+                    'track_low_thresh': track_low_th,
+                    'new_track_thresh': new_track_th,
                     'track_buffer': track_buf,
-                    'match_thresh': match_th
+                    'match_thresh': match_th,
+                    'fuse_score': fuse_score,
+                    'gmc_method': gmc_method,
+                    'proximity_thresh': prox_th,
+                    'appearance_thresh': appear_th,
+                    'with_reid': with_reid,
+                    'model': model
                 }
             }
             
-            run_name = f"grid_search_{i}_conf{conf}_h{height}_tt{track_th}_tb{track_buf}_mt{match_th}"
+            run_name = f"grid_search_{i}_conf{conf}_h{height}_tht{track_high_th}_tlt{track_low_th}_ntt{new_track_th}_tb{track_buf}_mt{match_th}_fs{int(fuse_score)}_gmc{gmc_method}_pt{prox_th}_at{appear_th}_reid{int(with_reid)}"
             
-            print(f"\n{'='*60}")
-            print(f"Grid Search Run {i}/{len(combinations)}")
-            print(f"{'='*60}")
+            logger.info(f"\n{'='*60}")
+            logger.info(f"Grid Search Run {i}/{len(combinations)}")
+            logger.info(f"{'='*60}")
             
             try:
                 result = self.run_experiment(
@@ -260,12 +286,12 @@ class MLflowRunner:
                     'metrics': result
                 })
             except Exception as e:
-                print(f"✗ Error in run {i}: {e}")
+                logger.info(f"✗ Error in run {i}: {e}")
                 continue
         
-        print(f"\n{'='*60}")
-        print(f"Grid search completed: {len(all_results)}/{len(combinations)} successful")
-        print(f"{'='*60}")
+        logger.info(f"\n{'='*60}")
+        logger.info(f"Grid search completed: {len(all_results)}/{len(combinations)} successful")
+        logger.info(f"{'='*60}")
         
         return all_results
     

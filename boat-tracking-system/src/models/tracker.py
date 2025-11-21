@@ -2,6 +2,7 @@ import cv2
 import yaml
 from pathlib import Path
 import tempfile
+from loguru import logger
 
 class Tracker:
     """Track objects across video frames using YOLO's built-in tracking."""
@@ -24,11 +25,11 @@ class Tracker:
         if self.config:
             # Create a temporary YAML file with config
             self.tracker_config = self._create_config_file(self.config)
-            print(f"Using custom tracker config with {len(self.config)} parameters")
+            logger.info(f"Using custom tracker config with {len(self.config)} parameters")
         else:
             # Use default built-in config
             self.tracker_config = f"{tracker_type}.yaml"
-            print(f"Using default {tracker_type} config")
+            logger.info(f"Using default {tracker_type} config")
     
     def _create_config_file(self, config_dict):
         """Create temporary YAML config file from dictionary."""
