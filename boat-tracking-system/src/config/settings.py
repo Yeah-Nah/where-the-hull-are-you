@@ -13,9 +13,9 @@ with open(CONFIG_FILE) as f:
     config = yaml.safe_load(f)
 
 # Input and output directories
-INPUT_DIR = config.get("input_directory", "")
+INPUT_DIR = Path(config.get("input_directory", ""))
 INPUT_PREPROCESSED_DIR = INPUT_DIR / "preprocessed"
-OUTPUT_DIR = config.get("output_directory", "")
+OUTPUT_DIR = Path(config.get("output_directory", ""))
 
 # Model configuration settngs
 with open(MODEL_CONFIG_FILE) as f:
