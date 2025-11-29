@@ -27,6 +27,7 @@ dependencies = [
     "PyYAML>=6.0",
     "matplotlib",
     "mlflow>=2.10.0",
+    "depthai>=3.2.1",
 ]
 
 # Optional dependencies for different use cases
