@@ -210,4 +210,5 @@ __marimo__/
 output/
 *.pt
 *.onnx
+*.blob
 mlruns/

@@ -11,10 +11,12 @@ from argparse import ArgumentParser
 
 scriptDir = Path(__file__).resolve().parent
 examplesRoot = (
-    scriptDir / Path("../")
+    scriptDir / Path("../oakd-camera-replay")
 ).resolve()  # This resolves the parent directory correctly
-models = examplesRoot / "models"
+models = examplesRoot / "src" / "models"
 videoPath = models / "construction_vest.mp4"
+
+
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--inputVideo", default=videoPath, help="Input video name")
