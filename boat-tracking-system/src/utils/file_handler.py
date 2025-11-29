@@ -1,6 +1,7 @@
 from pathlib import Path
 import cv2
 
+
 def read_video_files(input_folder):
     """
     Reads all video files from the specified input folder.
@@ -11,9 +12,10 @@ def read_video_files(input_folder):
     Returns:
         list: A list of paths to the video files.
     """
-    video_extensions = ['.mp4', '.mov', '.avi', '.mkv']
+    video_extensions = [".mp4", ".mov", ".avi", ".mkv"]
     input_path = Path(input_folder)
-    return [file for file in input_path.glob('*') if file.suffix in video_extensions]
+    return [file for file in input_path.glob("*") if file.suffix in video_extensions]
+
 
 def save_output_video(output_path, frame, fourcc, fps, width, height):
     """

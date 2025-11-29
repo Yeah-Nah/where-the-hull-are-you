@@ -2,13 +2,14 @@ from src.models.detector import Detector
 import os
 import pytest
 
+
 class TestDetector:
     @pytest.fixture(scope="class")
     def setup(self):
         self.detector = Detector(model_path="models/yolov8n.pt")
         self.test_video_path = "data/input/test_video.mp4"
         self.output_video_path = "data/output/test_output.mp4"
-        
+
         # Ensure the test video exists
         assert os.path.exists(self.test_video_path), "Test video file does not exist."
 
