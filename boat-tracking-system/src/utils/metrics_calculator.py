@@ -45,7 +45,9 @@ def calculate_iou(box1: List[float], box2: List[float]) -> float:
     return inter_area / union_area
 
 
-def normalize_bbox_area(bbox: List[float], frame_width: int, frame_height: int) -> float:
+def normalize_bbox_area(
+    bbox: List[float], frame_width: int, frame_height: int
+) -> float:
     """
     Normalize bounding box area by frame size.
 
@@ -138,7 +140,9 @@ def compute_track_lengths(track_history: Dict[int, List[int]]) -> Dict[str, floa
     }
 
 
-def calculate_short_track_ratio(track_history: Dict[int, List[int]], threshold: int = 5) -> float:
+def calculate_short_track_ratio(
+    track_history: Dict[int, List[int]], threshold: int = 5
+) -> float:
     """
     Calculate ratio of tracks shorter than threshold.
 

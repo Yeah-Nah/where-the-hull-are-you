@@ -32,7 +32,9 @@ class VideoMetricsCollector:
 
         # Track data
         self.track_history: Dict[int, List[int]] = {}  # track_id -> [frame_numbers]
-        self.track_bboxes: Dict[int, Dict[int, List[float]]] = {}  # track_id -> {frame_num -> bbox}
+        self.track_bboxes: Dict[
+            int, Dict[int, List[float]]
+        ] = {}  # track_id -> {frame_num -> bbox}
         self.all_track_ids: List[int] = []
 
         # IoU tracking
@@ -42,7 +44,9 @@ class VideoMetricsCollector:
         self.total_processing_time: Optional[float] = None
         self.total_frames: Optional[int] = None
 
-    def add_frame_detections(self, detections: List[Dict], frame_shape: Tuple[int, int] = None):
+    def add_frame_detections(
+        self, detections: List[Dict], frame_shape: Tuple[int, int] = None
+    ):
         """
         Add detection data from a single frame.
 
@@ -69,7 +73,10 @@ class VideoMetricsCollector:
                 self.bbox_areas.append(normalized_area)
 
     def add_frame_tracks(
-        self, tracks: Dict[int, List[float]], frame_num: int, previous_tracks: Optional[Dict[int, List[float]]] = None
+        self,
+        tracks: Dict[int, List[float]],
+        frame_num: int,
+        previous_tracks: Optional[Dict[int, List[float]]] = None,
     ):
         """
         Add tracking data from a single frame.
@@ -162,7 +169,9 @@ class VideoMetricsCollector:
 
         # Track fragmentation rate
         if self.all_track_ids and self.frame_count > 0:
-            metrics["track_fragmentation_rate"] = calculate_track_fragmentation(self.all_track_ids, self.frame_count)
+            metrics["track_fragmentation_rate"] = calculate_track_fragmentation(
+                self.all_track_ids, self.frame_count
+            )
         else:
             metrics["track_fragmentation_rate"] = 0.0
 
@@ -170,8 +179,12 @@ class VideoMetricsCollector:
         if self.frame_to_frame_ious:
             import numpy as np
 
-            metrics["frame_to_frame_iou_mean"] = float(np.mean(self.frame_to_frame_ious))
-            metrics["frame_to_frame_iou_median"] = float(np.median(self.frame_to_frame_ious))
+            metrics["frame_to_frame_iou_mean"] = float(
+                np.mean(self.frame_to_frame_ious)
+            )
+            metrics["frame_to_frame_iou_median"] = float(
+                np.median(self.frame_to_frame_ious)
+            )
             metrics["frame_to_frame_iou_std"] = float(np.std(self.frame_to_frame_ious))
         else:
             metrics["frame_to_frame_iou_mean"] = 0.0
@@ -180,14 +193,20 @@ class VideoMetricsCollector:
 
         # Short track ratio
         if self.track_history:
-            metrics["short_track_ratio"] = calculate_short_track_ratio(self.track_history, threshold=5)
+            metrics["short_track_ratio"] = calculate_short_track_ratio(
+                self.track_history, threshold=5
+            )
         else:
             metrics["short_track_ratio"] = 0.0
 
         # Processing performance
         if self.total_processing_time is not None and self.total_frames is not None:
             metrics["total_processing_time"] = self.total_processing_time
-            metrics["processing_fps"] = self.total_frames / self.total_processing_time if self.total_processing_time > 0 else 0.0
+            metrics["processing_fps"] = (
+                self.total_frames / self.total_processing_time
+                if self.total_processing_time > 0
+                else 0.0
+            )
         else:
             metrics["total_processing_time"] = 0.0
             metrics["processing_fps"] = 0.0

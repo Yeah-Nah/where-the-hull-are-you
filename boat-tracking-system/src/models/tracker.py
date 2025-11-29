@@ -26,7 +26,9 @@ class Tracker:
         if self.config:
             # Create a temporary YAML file with config
             self.tracker_config = self._create_config_file(self.config)
-            logger.info(f"Using custom tracker config with {len(self.config)} parameters")
+            logger.info(
+                f"Using custom tracker config with {len(self.config)} parameters"
+            )
         else:
             # Use default built-in config
             self.tracker_config = f"{tracker_type}.yaml"
@@ -48,7 +50,12 @@ class Tracker:
     def track(self, model, frame, confidence_threshold=0.5, target_class_ids=None):
         """Track objects in frame using YOLO's built-in tracking."""
         results = model.track(
-            frame, conf=confidence_threshold, persist=True, tracker=self.tracker_config, classes=target_class_ids, verbose=False
+            frame,
+            conf=confidence_threshold,
+            persist=True,
+            tracker=self.tracker_config,
+            classes=target_class_ids,
+            verbose=False,
         )
         return results
 
@@ -63,7 +70,9 @@ class Tracker:
             class_ids = results[0].boxes.cls.cpu().numpy().astype(int)
             names = results[0].names
 
-            for box, track_id, conf, cls_id in zip(boxes, track_ids, confidences, class_ids):
+            for box, track_id, conf, cls_id in zip(
+                boxes, track_ids, confidences, class_ids
+            ):
                 x1, y1, x2, y2 = map(int, box)
 
                 # Draw bounding box
@@ -73,7 +82,15 @@ class Tracker:
                 class_name = names[cls_id]
                 label = f"ID:{track_id} {class_name} {conf:.2f}"
 
-                cv2.putText(annotated_frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                cv2.putText(
+                    annotated_frame,
+                    label,
+                    (x1, y1 - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (0, 255, 0),
+                    2,
+                )
 
         return annotated_frame
 
@@ -88,7 +105,9 @@ class Tracker:
             class_ids = results[0].boxes.cls.cpu().numpy().astype(int)
             names = results[0].names
 
-            for box, track_id, conf, cls_id in zip(boxes, track_ids, confidences, class_ids):
+            for box, track_id, conf, cls_id in zip(
+                boxes, track_ids, confidences, class_ids
+            ):
                 x1, y1, x2, y2 = map(int, box)
                 tracks.append(
                     {

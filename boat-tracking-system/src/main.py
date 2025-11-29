@@ -16,7 +16,9 @@ def main():
         config = yaml.safe_load(file)
 
     # Initialize the batch processor
-    batch_processor = BatchProcessor(config["input_folder"], config["output_folder"], logger)
+    batch_processor = BatchProcessor(
+        config["input_folder"], config["output_folder"], logger
+    )
 
     # Process videos
     logger.info("Starting video processing...")

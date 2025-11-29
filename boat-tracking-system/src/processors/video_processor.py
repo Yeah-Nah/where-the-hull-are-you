@@ -4,7 +4,9 @@ from loguru import logger
 
 
 class VideoProcessor:
-    def __init__(self, input_path, output_path, detector, tracker, metrics_collector=None):
+    def __init__(
+        self, input_path, output_path, detector, tracker, metrics_collector=None
+    ):
         self.input_path = input_path
         self.output_path = output_path
         self.detector = detector
@@ -53,7 +55,9 @@ class VideoProcessor:
 
                 # Extract tracking data
                 tracks = self._extract_tracks_from_results(results)
-                self.metrics_collector.add_frame_tracks(tracks, frame_count, self.previous_tracks)
+                self.metrics_collector.add_frame_tracks(
+                    tracks, frame_count, self.previous_tracks
+                )
                 self.previous_tracks = tracks
 
             tracked_frame = self.tracker.draw_tracks(frame, results)
@@ -82,7 +86,9 @@ class VideoProcessor:
                 confidence = float(boxes.conf[i].cpu().numpy())
                 class_id = int(boxes.cls[i].cpu().numpy())
 
-                detections.append({"bbox": bbox, "confidence": confidence, "class_id": class_id})
+                detections.append(
+                    {"bbox": bbox, "confidence": confidence, "class_id": class_id}
+                )
 
         return detections
 

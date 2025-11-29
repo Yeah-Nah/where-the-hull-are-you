@@ -102,18 +102,28 @@ class MLflowRunner:
             if "preprocess" in hyperparameters and hyperparameters["preprocess"]:
                 logger.info(f"Preprocessing videos to height {target_height}...")
                 preprocessor = VideoPreprocessor(
-                    input_dir=hyperparameters.get("raw_input_dir", input_dir), output_dir=input_dir, target_height=target_height
+                    input_dir=hyperparameters.get("raw_input_dir", input_dir),
+                    output_dir=input_dir,
+                    target_height=target_height,
                 )
                 preprocessor.preprocess_all()
 
             # Initialize detector and tracker
-            detector = Detector(model_path=model_path, confidence_threshold=confidence_threshold, target_classes=boat_classes)
+            detector = Detector(
+                model_path=model_path,
+                confidence_threshold=confidence_threshold,
+                target_classes=boat_classes,
+            )
 
             tracker = Tracker(tracker_type=tracker_type, config=botsort_config)
 
             # Run batch processing with metrics collection
             batch_processor = BatchProcessor(
-                input_dir=input_dir, output_dir=output_dir, detector=detector, tracker=tracker, collect_metrics=True
+                input_dir=input_dir,
+                output_dir=output_dir,
+                detector=detector,
+                tracker=tracker,
+                collect_metrics=True,
             )
 
             logger.info(f"Processing videos with hyperparameters:")
@@ -139,7 +149,12 @@ class MLflowRunner:
             return metrics
 
     def run_experiment_from_config(
-        self, config_path: str, input_dir: str, output_dir: str, model_path: str = "models/yolov8n.pt", boat_classes: list = None
+        self,
+        config_path: str,
+        input_dir: str,
+        output_dir: str,
+        model_path: str = "models/yolov8n.pt",
+        boat_classes: list = None,
     ):
         """
         Run experiment from YAML configuration file.
@@ -170,7 +185,12 @@ class MLflowRunner:
         )
 
     def run_grid_search(
-        self, config_path: str, input_dir: str, output_dir: str, model_path: str = "models/yolov8n.pt", boat_classes: list = None
+        self,
+        config_path: str,
+        input_dir: str,
+        output_dir: str,
+        model_path: str = "models/yolov8n.pt",
+        boat_classes: list = None,
     ):
         """
         Run grid search from configuration file.
@@ -291,7 +311,9 @@ class MLflowRunner:
                 continue
 
         logger.info(f"\n{'=' * 60}")
-        logger.info(f"Grid search completed: {len(all_results)}/{len(combinations)} successful")
+        logger.info(
+            f"Grid search completed: {len(all_results)}/{len(combinations)} successful"
+        )
         logger.info(f"{'=' * 60}")
 
         return all_results

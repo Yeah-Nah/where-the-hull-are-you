@@ -37,7 +37,11 @@ class BatchProcessor:
     def process_videos(self):
         """Process all video files in the input directory."""
         video_extensions = (".mp4", ".mov", ".avi", ".mkv")
-        video_files = [f for f in os.listdir(self.input_dir) if f.lower().endswith(video_extensions)]
+        video_files = [
+            f
+            for f in os.listdir(self.input_dir)
+            if f.lower().endswith(video_extensions)
+        ]
 
         logger.info(f"Found {len(video_files)} video files to process")
 
@@ -52,7 +56,9 @@ class BatchProcessor:
             output_path = os.path.join(self.output_dir, output_filename)
 
             # Create metrics collector if enabled
-            metrics_collector = VideoMetricsCollector(video_file) if self.collect_metrics else None
+            metrics_collector = (
+                VideoMetricsCollector(video_file) if self.collect_metrics else None
+            )
 
             # Create video processor and process
             video_processor = VideoProcessor(

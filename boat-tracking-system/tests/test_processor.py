@@ -4,7 +4,10 @@ from src.processors.batch_processor import BatchProcessor
 
 def test_video_processor():
     # Initialize the VideoProcessor with a sample video file
-    video_processor = VideoProcessor(input_path="data/input/sample_video.mp4", output_path="data/output/processed_video.mp4")
+    video_processor = VideoProcessor(
+        input_path="data/input/sample_video.mp4",
+        output_path="data/output/processed_video.mp4",
+    )
 
     # Process the video
     result = video_processor.process()

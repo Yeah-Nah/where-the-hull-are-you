@@ -32,7 +32,9 @@ BOTSORT_CONFIG = model_config.get("botsort_config", {})
 
 # MLflow settings
 MLFLOW_TRACKING_URI = config.get("mlflow_tracking_uri", "file:./mlruns")
-MLFLOW_EXPERIMENT_NAME = config.get("mlflow_experiment_name", "boat-tracking-experiments")
+MLFLOW_EXPERIMENT_NAME = config.get(
+    "mlflow_experiment_name", "boat-tracking-experiments"
+)
 MLFLOW_ARTIFACT_LOCATION = config.get("mlflow_artifact_location", None)
 
 # Experiment settings

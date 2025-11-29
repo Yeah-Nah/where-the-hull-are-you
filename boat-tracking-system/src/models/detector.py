@@ -25,7 +25,9 @@ class Detector:
         self.target_class_ids = None
         if target_classes:
             self.target_class_ids = [
-                class_id for class_id, class_name in self.model.names.items() if class_name in target_classes
+                class_id
+                for class_id, class_name in self.model.names.items()
+                if class_name in target_classes
             ]
             logger.info(f"Filtering for classes: {target_classes}")
             logger.info(f"Class IDs: {self.target_class_ids}")

@@ -34,7 +34,11 @@ class VideoPreprocessor:
 
     def get_video_files(self, directory):
         """Get all video files in directory."""
-        video_files = [f for f in os.listdir(directory) if f.lower().endswith(self.video_extensions)]
+        video_files = [
+            f
+            for f in os.listdir(directory)
+            if f.lower().endswith(self.video_extensions)
+        ]
         return set(video_files)
 
     def get_video_resolution(self, video_path):
@@ -92,7 +96,9 @@ class VideoPreprocessor:
         new_height = new_height if new_height % 2 == 0 else new_height + 1
 
         logger.info(f"  Orientation: {orientation}")
-        logger.info(f"  Resizing from {original_width}x{original_height} to {new_width}x{new_height}")
+        logger.info(
+            f"  Resizing from {original_width}x{original_height} to {new_width}x{new_height}"
+        )
 
         # Setup video writer
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
@@ -105,13 +111,17 @@ class VideoPreprocessor:
                 break
 
             # Resize frame
-            resized_frame = cv2.resize(frame, (new_width, new_height), interpolation=cv2.INTER_AREA)
+            resized_frame = cv2.resize(
+                frame, (new_width, new_height), interpolation=cv2.INTER_AREA
+            )
             out.write(resized_frame)
 
             frame_count += 1
             if frame_count % 100 == 0:
                 progress = (frame_count / total_frames) * 100
-                logger.info(f"    Progress: {progress:.1f}% ({frame_count}/{total_frames} frames)")
+                logger.info(
+                    f"    Progress: {progress:.1f}% ({frame_count}/{total_frames} frames)"
+                )
 
         cap.release()
         out.release()
@@ -144,7 +154,13 @@ class VideoPreprocessor:
         if not videos_to_process:
             logger.info("\n✓ All videos have already been preprocessed!")
             logger.info(f"  {len(input_videos)} video(s) found in output directory")
-            return {"total": len(input_videos), "already_processed": len(input_videos), "copied": 0, "resized": 0, "skipped": 0}
+            return {
+                "total": len(input_videos),
+                "already_processed": len(input_videos),
+                "copied": 0,
+                "resized": 0,
+                "skipped": 0,
+            }
 
         logger.info(f"\nFound {len(videos_to_process)} video(s) to process:")
         for video in sorted(videos_to_process):
@@ -181,13 +197,17 @@ class VideoPreprocessor:
             # Check if video needs resizing based on shorter dimension
             if shorter_dimension <= self.target_height:
                 # Video is already at or below target - just copy
-                logger.info(f"  Already at or below {self.target_height}p - copying as-is")
+                logger.info(
+                    f"  Already at or below {self.target_height}p - copying as-is"
+                )
                 shutil.copy2(input_path, output_path)
                 stats["copied"] += 1
                 logger.success(f"  ✓ Copied to output directory")
             else:
                 # Video needs resizing
-                logger.warning(f"  Needs resizing (shorter dimension > {self.target_height}p)")
+                logger.warning(
+                    f"  Needs resizing (shorter dimension > {self.target_height}p)"
+                )
                 try:
                     self.resize_video(input_path, output_path)
                     stats["resized"] += 1
