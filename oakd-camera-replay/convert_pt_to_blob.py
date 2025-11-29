@@ -18,10 +18,10 @@ from ultralytics import YOLO
 
 def convert_pt_to_blob(
     pt_model_path: str,
-    output_dir: str = "models",
-    img_size: int = 640,
+    output_dir: str = "src/models",
+    img_size: tuple = (512, 384),
     shaves: int = 6,
-    openvino_version: str = "2022.1"
+    openvino_version: str = "2022.1",
 ):
     """
     Convert YOLOv8 .pt model to .blob format.
@@ -118,8 +118,10 @@ def main():
     parser.add_argument(
         "-s", "--img-size",
         type=int,
-        default=640,
-        help="Input image size (default: 640)"
+        nargs=2,  # Changed to accept 2 values
+        default=[384, 512],  # Changed default to [height, width]
+        metavar=('HEIGHT', 'WIDTH'),
+        help="Input image size as HEIGHT WIDTH (default: 384 512)"
     )
     parser.add_argument(
         "--shaves",

@@ -37,9 +37,10 @@ with dai.Pipeline() as pipeline:
         replay.setReplayVideoFile(Path(args.inputVideo))
         inputSource = replay
 
-    detectionNetwork = pipeline.create(dai.node.DetectionNetwork).build(
-        inputSource, "yolov6-nano"
-    )
+    custom_nn = pipeline.create(dai.node.NeuralNetwork)
+    custom_nn.setBlobPath(str(models / "yolov8n_openvino_2022.1_6shave.blob"))
+    # Linking camera to NN input
+    inputSource.preview.link(custom_nn.input)
     objectTracker = pipeline.create(dai.node.ObjectTracker)
 
     detectionNetwork.setConfidenceThreshold(0.6)
