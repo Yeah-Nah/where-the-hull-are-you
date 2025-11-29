@@ -25,15 +25,12 @@ Initial set up learning modern Python tooling and open source computer vision te
 
 ### Setting Up the Project Infrastructure
 
-Today I learned about modern Python project setup and tooling:
+Covered the following:
 
 - **pyproject.toml**: Migrated from legacy `setup.py` to the modern standard
 - **Ruff**: Adopted as the all-in-one linter and formatter (replacing flake8, isort, black)
 - **Project Structure**: Organized code into proper packages with clear separation of concerns
-
-### Key Learnings
-
-The Python ecosystem has evolved significantly. `pyproject.toml` is now the single source of truth for project configuration, dependencies, and tool settings. This simplifies the development workflow considerably.
+- **OAK-D Connection**: Used depthai library to connect to OAK-d camera
 
 ---
 
@@ -41,7 +38,12 @@ The Python ecosystem has evolved significantly. `pyproject.toml` is now the sing
 
 ### Early Development
 
-Booted up the OAK-D camera and connected it to the Viewer app. Holy crap what have I gotten myself into with this project.  
+Booted up the OAK-D camera and connected it to the Viewer app. Holy crap what have I gotten myself into with this project.
+
 <img src="other/images_md/Screenshot%202025-11-29%20134603.png" alt="Screenshot" width="600">
+
+Connected to OAK-d cameras using depthai library.
+
+<img src="other/images_md/Screenshot 2025-11-29 163821.png" alt="Screenshot" width="600">
 
 ---
