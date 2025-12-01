@@ -4,6 +4,8 @@ A development journey blog documenting the creation of a boat tracking system.
 
 ---
 
+# Phase 0: Set Up Local Dev Env
+
 ## Entry 1: Getting Started
 *Date: November 23, 2025*
 
@@ -47,3 +49,18 @@ Connected to OAK-d cameras using depthai library.
 <img src="other/images_md/Screenshot 2025-11-29 163821.png" alt="Screenshot" width="600">
 
 ---
+
+## Entry 3: Familiarisation With NN Outputs
+*Date: December 1, 2025*
+
+### Semi-Custom Model
+
+Covered the following:
+
+- **blob conversion**: Converted yolov8n model (not already pre-loaded from depthai API) to blob format to use in pipeline
+- **model output**: Familiarising with NN output from yolov8n model on camera output. Yolov8n theory.
+- **OAK-D pipeline**: Exploring depthai pipeline capabilities
+
+Considerations:
+
+- **feature maps**: Customising smaller feature maps for on water boat tracking for boats > 500m away
