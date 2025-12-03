@@ -57,10 +57,10 @@ Connected to OAK-d cameras using depthai library.
 
 Covered the following:
 
-- **blob conversion**: Converted yolov8n model (not already pre-loaded from depthai API) to blob format to use in pipeline
-- **model output**: Familiarising with NN output from yolov8n model on camera output. Yolov8n theory.
+- **blob conversion**: Tested converting non-included model (yolov8n) to blob format to use as "custom model"
+- **model output**: Familiarising with NN output from yolov8n model on camera output. Yolov8n theory. Matrices... omg I'm back in uni.
 - **OAK-D pipeline**: Exploring depthai pipeline capabilities
 
 Considerations:
 
-- **feature maps**: Customising smaller feature maps for on water boat tracking for boats > 500m away
+- **feature maps**: Creating custom anchor boxes on the feature maps for on water boat tracking for boats > 500m away. Yolov8n is **anchor free**.
