@@ -3,11 +3,10 @@ import cv2
 import depthai as dai
 import numpy as np
 from pathlib import Path
-from src.config.settings import INPUT_DIR
-from src.config.model_settings import CLASS_IDS, CONFIDENCE_THRESHOLD, MODEL_BLOB, COCO_CLASSES
+from src.config.model_settings import CLASS_IDS, CONFIDENCE_THRESHOLD, COCO_CLASSES
 
 
-def run_detection_pipeline(input_video: str = None, use_camera: bool = False, model_path: Path = None):
+def camera_detection_pipeline(model_path: Path = None):
     """
     Run the object detection pipeline.
     
@@ -18,24 +17,11 @@ def run_detection_pipeline(input_video: str = None, use_camera: bool = False, mo
     """
     with dai.Pipeline() as pipeline:
         # Define sources and outputs
-        inputSource = None
-        if use_camera:
-            camRgb = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
-            inputSource = camRgb
-            
-            # Get the video size from camera configuration
-            video_size = camRgb.getVideoSize()
-            output_width, output_height = video_size
-        else:
-            replay = pipeline.create(dai.node.ReplayVideo)
-            replay.setReplayVideoFile(Path(input_video))
-            inputSource = replay
-            # For replay, default size
-            output_width, output_height = 512, 384
-        
+        camRgb = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
+
         # Setup neural network input/output
-        cam_out = inputSource.requestOutput((output_width, output_height), dai.ImgFrame.Type.BGR888p)
-        video_out = inputSource.requestOutput((output_width, output_height), dai.ImgFrame.Type.BGR888p)
+        cam_out = camRgb.requestOutput((512, 384), dai.ImgFrame.Type.BGR888p)
+        video_out = camRgb.requestOutput((512, 384), dai.ImgFrame.Type.BGR888p)
         video_queue = video_out.createOutputQueue()
 
         nn = pipeline.create(dai.node.NeuralNetwork)

@@ -22,7 +22,6 @@ class detectionPipeline():
         if self.use_camera == True:
             
             camera_detection_pipeline(
-                use_camera=self.use_camera,
                 model_path=self.model_path
             )
         
