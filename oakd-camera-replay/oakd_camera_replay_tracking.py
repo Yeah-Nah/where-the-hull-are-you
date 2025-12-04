@@ -12,7 +12,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 
 from src.config.settings import INPUT_DIR
-from src.config.model_settings import CLASS_IDS, CONFIDENCE_THRESHOLD
+from src.config.model_settings import CLASS_IDS, CONFIDENCE_THRESHOLD, MODEL_BLOB, COCO_CLASSES
 
 scriptDir = Path(__file__).resolve().parent
 examplesRoot = (
@@ -32,22 +32,24 @@ with dai.Pipeline() as pipeline:
     # Define sources and outputs
     inputSource = None
     if args.camera:
-        # CAM_A i think is the rgb camera
         camRgb = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
         inputSource = camRgb
+        
+        # Get the video size from camera configuration
+        video_size = camRgb.getVideoSize()
+        output_width, output_height = video_size
     else:
-        replay = pipeline.create(dai.node.ReplayVideo)
-        replay.setReplayVideoFile(Path(args.inputVideo))
-        inputSource = replay
+        # For replay, you can get it from the first frame
+        output_width, output_height = 512, 384  # Default
     # If your nn model requires 512x384 input size (BGR):
-    cam_out = inputSource.requestOutput((512, 384), dai.ImgFrame.Type.BGR888p)
+    cam_out = inputSource.requestOutput((output_width, output_height), dai.ImgFrame.Type.BGR888p)
     
     # Get video output for display (full resolution)
-    video_out = inputSource.requestOutput((512, 384), dai.ImgFrame.Type.BGR888p)
+    video_out = inputSource.requestOutput((output_width, output_height), dai.ImgFrame.Type.BGR888p)
     video_queue = video_out.createOutputQueue()
 
     nn = pipeline.create(dai.node.NeuralNetwork)
-    nn.setBlobPath(str(models / ))
+    nn.setBlobPath(str(models / MODEL_BLOB))
     
     # Link input to neural network
     cam_out.link(nn.input)
@@ -113,7 +115,7 @@ with dai.Pipeline() as pipeline:
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 
                 # Draw label with class name and confidence
-                class_name = coco_classes.get(det['class'], f"Class {det['class']}")
+                class_name = COCO_CLASSES.get(det['class'], f"Class {det['class']}")
                 label = f"{class_name}: {det['confidence']:.2f}"
                 
                 # Draw label background
