@@ -1,0 +1,6 @@
+input_directory: "E:/01_personal_project/input"
+output_directory: "E:/01_personal_project/output"
+
+# MLflow Configuration
+mlflow_tracking_uri: "file:./mlruns"
+mlflow_experiment_name: "tracking-experiments"

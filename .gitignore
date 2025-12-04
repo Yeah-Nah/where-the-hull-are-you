@@ -210,4 +210,9 @@ __marimo__/
 output/
 *.pt
 *.onnx
+*.blob
 mlruns/
+
+# Ignore DepthAI cached models and lock files
+oakd-camera-replay/.depthai_cached_models/
+*.lock
