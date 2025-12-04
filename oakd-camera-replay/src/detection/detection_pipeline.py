@@ -1,5 +1,6 @@
 from pathlib import Path
 from src.processors.camera_feed_proccessor import camera_detection_pipeline
+# from src.processors.video_feed_processor import video_detection_pipeline
 
 class detectionPipeline():
     """Runs required detection pipeline on given input feed. Either video reply or camera feed."""
@@ -26,7 +27,11 @@ class detectionPipeline():
             )
         
         elif self.input_video is not None:
-            print("Placeholder for now")
+            print("blah blah")
+            # video_detection_pipeline(
+            #     input_video=self.input_video,
+            #     model_path=self.model_path
+            # )
 
         else:
             raise ValueError("Either input_video must be provided or use_camera must be True.")

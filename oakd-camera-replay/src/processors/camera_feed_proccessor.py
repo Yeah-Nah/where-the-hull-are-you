@@ -4,6 +4,7 @@ import depthai as dai
 import numpy as np
 from pathlib import Path
 from src.config.model_settings import CLASS_IDS, CONFIDENCE_THRESHOLD, COCO_CLASSES
+from src.config.camera_settings import CAM_WIDTH, CAM_HEIGHT
 
 
 def camera_detection_pipeline(model_path: Path = None):
@@ -20,8 +21,8 @@ def camera_detection_pipeline(model_path: Path = None):
         camRgb = pipeline.create(dai.node.Camera).build(dai.CameraBoardSocket.CAM_B)
 
         # Setup neural network input/output
-        cam_out = camRgb.requestOutput((512, 384), dai.ImgFrame.Type.BGR888p)
-        video_out = camRgb.requestOutput((512, 384), dai.ImgFrame.Type.BGR888p)
+        cam_out = camRgb.requestOutput((CAM_WIDTH, CAM_HEIGHT), dai.ImgFrame.Type.BGR888p)
+        video_out = camRgb.requestOutput((CAM_WIDTH, CAM_HEIGHT), dai.ImgFrame.Type.BGR888p)
         video_queue = video_out.createOutputQueue()
 
         nn = pipeline.create(dai.node.NeuralNetwork)
