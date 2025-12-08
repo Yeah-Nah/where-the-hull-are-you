@@ -31,22 +31,15 @@ class VideoFeedProcessor:
 
         Returns
         -------
-            tuple: (pipeline, cam_out, video_queue)
+            tuple: (pipeline, replay_node, video_queue)
         """
-        # Get video resolution
-        width, height = self.get_video_resolution()
-
         # Define sources and outputs
         replay = self.pipeline.create(dai.node.ReplayVideo)
         replay.setReplayVideoFile(Path(self.video_path))
+        replay.setOutFrameType(dai.ImgFrame.Type.BGR888p)
+        replay.setLoop(True)
 
-        # Setup neural network input/output
-        cam_out = replay.requestOutput(
-            (width, height), dai.ImgFrame.Type.BGR888p, fps=30
-        )
-        video_out = replay.requestOutput(
-            (width, height), dai.ImgFrame.Type.BGR888p, fps=30
-        )
-        video_queue = video_out.createOutputQueue()
+        # Create output queue directly from replay.out
+        video_queue = replay.out.createOutputQueue()
 
-        return self.pipeline, cam_out, video_queue
+        return self.pipeline, replay, video_queue

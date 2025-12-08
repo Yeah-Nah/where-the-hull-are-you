@@ -8,8 +8,6 @@ import depthai as dai
 import numpy as np
 from src.config.model_settings import CLASS_IDS, COCO_CLASSES, CONFIDENCE_THRESHOLD
 from src.processors.camera_feed_proccessor import CameraFeedProcessor
-from src.processors.video_replay_processor import VideoFeedProcessor
-
 
 class DetectionPipeline:
     """Runs required detection pipeline on given input feed. Either video replay or camera feed."""
@@ -38,12 +36,9 @@ class DetectionPipeline:
             processor = CameraFeedProcessor()
             self.pipeline, cam_out, self.video_queue = processor.camera_feed_connect()
 
-        elif self.input_video is not None:
-            processor = VideoFeedProcessor(video_path=self.input_video)
-            self.pipeline, cam_out, self.video_queue = processor.video_feed_connect()
         else:
             raise ValueError(
-                "Either input_video must be provided or use_camera must be True."
+                "You got a problem yo."
             )
 
         # Add neural network to the pipeline

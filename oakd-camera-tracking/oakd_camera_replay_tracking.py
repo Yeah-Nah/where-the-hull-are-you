@@ -14,7 +14,6 @@ examples_root = (
 models = examples_root / "src" / "models"
 
 parser = ArgumentParser()
-parser.add_argument("-i", "--inputVideo", default=INPUT_DIR, help="Input video name")
 parser.add_argument(
     "-c", "--camera", type=bool, help="Use camera as input", default=False
 )
