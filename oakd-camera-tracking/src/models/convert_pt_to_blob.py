@@ -10,9 +10,9 @@ This script:
 """
 
 import argparse
-import subprocess
 import sys
 from pathlib import Path
+
 from ultralytics import YOLO
 
 
@@ -56,8 +56,8 @@ def convert_pt_to_blob(
     print(f"   ✓ ONNX model saved: {onnx_path}")
 
     # Step 2: Convert ONNX to OpenVINO IR
-    print(f"[3/3] Converting ONNX to .blob format...")
-    print(f"   Note: This requires blobconverter package")
+    print("[3/3] Converting ONNX to .blob format...")
+    print("   Note: This requires blobconverter package")
 
     try:
         import blobconverter
@@ -74,8 +74,8 @@ def convert_pt_to_blob(
         )
 
         print(f"   ✓ Blob model saved: {blob_path}")
-        print(f"\n✅ Conversion complete!")
-        print(f"\nOutput files:")
+        print("\n✅ Conversion complete!")
+        print("\nOutput files:")
         print(f"   - ONNX: {onnx_path}")
         print(f"   - BLOB: {blob_path}")
 

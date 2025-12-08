@@ -1,5 +1,6 @@
-import yaml
 from pathlib import Path
+
+import yaml
 
 BASE_DIR = Path(__file__).parent.parent.parent
 MODEL_CONFIG_FILE = BASE_DIR / "config" / "model_config.yaml"

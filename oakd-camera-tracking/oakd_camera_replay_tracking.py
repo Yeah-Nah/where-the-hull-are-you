@@ -2,18 +2,13 @@
 
 #!/usr/bin/env python3
 
-from socket import socket
-import cv2
-import depthai as dai
-import time
-import numpy as np
 
-from pathlib import Path
 from argparse import ArgumentParser
+from pathlib import Path
 
-from src.detection.detection_pipeline import detectionPipeline
-from src.config.settings import INPUT_DIR
 from src.config.model_settings import MODEL_BLOB
+from src.config.settings import INPUT_DIR
+from src.detection.detection_pipeline import detectionPipeline
 
 scriptDir = Path(__file__).resolve().parent
 examplesRoot = (

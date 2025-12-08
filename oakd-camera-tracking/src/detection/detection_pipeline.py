@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import time
+from pathlib import Path
+
 import cv2
 import depthai as dai
 import numpy as np
-import time
-from pathlib import Path
-from src.config.model_settings import CLASS_IDS, CONFIDENCE_THRESHOLD, COCO_CLASSES
+from src.config.model_settings import CLASS_IDS, COCO_CLASSES, CONFIDENCE_THRESHOLD
 from src.processors.camera_feed_proccessor import cameraFeedProcessor
 from src.processors.video_replay_processor import videoFeedProcessor
 
@@ -31,7 +32,6 @@ class detectionPipeline:
 
     def run_detection(self):
         """Run the required detection pipeline."""
-
         # Get pipeline and queues from appropriate processor
         if self.use_camera:
             processor = cameraFeedProcessor()
@@ -111,7 +111,8 @@ class detectionPipeline:
         Args:
             tensor: Neural network output tensor of shape (1, 84, 4032)
 
-        Returns:
+        Returns
+        -------
             List of valid detections
         """
         valid_detections = []
@@ -155,7 +156,8 @@ class detectionPipeline:
             frame_height: Frame height
             fps: Current FPS
 
-        Returns:
+        Returns
+        -------
             Frame with drawn detections
         """
         for det in detections:

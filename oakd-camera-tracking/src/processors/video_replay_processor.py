@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import cv2
 import depthai as dai
-from pathlib import Path
 
 
 class videoFeedProcessor:
@@ -26,7 +27,8 @@ class videoFeedProcessor:
     def video_feed_connect(self):
         """Connect to the video feed.
 
-        Returns:
+        Returns
+        -------
             tuple: (pipeline, cam_out, video_queue)
         """
         # Get video resolution

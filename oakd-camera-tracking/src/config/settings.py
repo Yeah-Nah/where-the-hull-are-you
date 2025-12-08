@@ -1,7 +1,7 @@
 # Configuration settings for the boat tracking system
-import yaml
-import os
 from pathlib import Path
+
+import yaml
 
 # Get project root (2 levels up from this file)
 BASE_DIR = Path(__file__).parent.parent.parent

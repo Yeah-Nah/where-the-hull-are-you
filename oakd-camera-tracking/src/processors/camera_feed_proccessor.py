@@ -1,5 +1,5 @@
 import depthai as dai
-from src.config.camera_settings import CAM_WIDTH, CAM_HEIGHT
+from src.config.camera_settings import CAM_HEIGHT, CAM_WIDTH
 
 
 class cameraFeedProcessor:
@@ -12,7 +12,8 @@ class cameraFeedProcessor:
     def camera_feed_connect(self):
         """Connect to the camera feed.
 
-        Returns:
+        Returns
+        -------
             tuple: (pipeline, cam_out, video_queue)
         """
         # Define sources and outputs

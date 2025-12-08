@@ -1,5 +1,6 @@
-import yaml
 from pathlib import Path
+
+import yaml
 
 BASE_DIR = Path(__file__).parent.parent.parent
 CONFIG = BASE_DIR / "config" / "camera_config.yaml"
