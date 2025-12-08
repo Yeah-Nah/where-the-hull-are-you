@@ -17,8 +17,4 @@ OUTPUT_DIR = Path(config.get("output_directory", ""))
 
 # MLflow settings
 MLFLOW_TRACKING_URI = config.get("mlflow_tracking_uri", "file:./mlruns")
-MLFLOW_EXPERIMENT_NAME = config.get(
-    "mlflow_experiment_name", None
-)
-
-
+MLFLOW_EXPERIMENT_NAME = config.get("mlflow_experiment_name", None)

@@ -9,10 +9,12 @@ from src.processors.camera_feed_proccessor import cameraFeedProcessor
 from src.processors.video_replay_processor import videoFeedProcessor
 
 
-class detectionPipeline():
+class detectionPipeline:
     """Runs required detection pipeline on given input feed. Either video replay or camera feed."""
 
-    def __init__(self, input_video: str = None, use_camera: bool = False, model_path: Path = None):
+    def __init__(
+        self, input_video: str = None, use_camera: bool = False, model_path: Path = None
+    ):
         """Initiate detection pipeline.
 
         Args:
@@ -29,78 +31,86 @@ class detectionPipeline():
 
     def run_detection(self):
         """Run the required detection pipeline."""
-        
+
         # Get pipeline and queues from appropriate processor
         if self.use_camera:
             processor = cameraFeedProcessor()
             self.pipeline, cam_out, self.video_queue = processor.camera_feed_connect()
-        
+
         elif self.input_video is not None:
             processor = videoFeedProcessor(video_path=self.input_video)
             self.pipeline, cam_out, self.video_queue = processor.video_feed_connect()
         else:
-            raise ValueError("Either input_video must be provided or use_camera must be True.")
-        
+            raise ValueError(
+                "Either input_video must be provided or use_camera must be True."
+            )
+
         # Add neural network to the pipeline
         nn = self.pipeline.create(dai.node.NeuralNetwork)
         nn.setBlobPath(str(self.model_path))
-        
+
         # Link input to neural network
         cam_out.link(nn.input)
         self.nn_queue = nn.out.createOutputQueue()
-        
+
         # Start pipeline
         self.pipeline.start()
-        
+
         # FPS calculation
         prev_time = time.time()
-        
+
         try:
             while self.pipeline.isRunning():
                 # Get video frame
                 videoFrame = self.video_queue.tryGet()
                 inNNData = self.nn_queue.tryGet()
-                
+
                 if videoFrame is not None and inNNData is not None:
                     # Calculate FPS
                     current_time = time.time()
-                    fps = 1 / (current_time - prev_time) if (current_time - prev_time) > 0 else 0
+                    fps = (
+                        1 / (current_time - prev_time)
+                        if (current_time - prev_time) > 0
+                        else 0
+                    )
                     prev_time = current_time
-                    
+
                     assert isinstance(videoFrame, dai.ImgFrame)
                     frame = videoFrame.getCvFrame()
                     frame_height, frame_width = frame.shape[:2]
-                    
+
                     tensor = inNNData.getFirstTensor()
                     assert isinstance(tensor, np.ndarray)
-                    
+
                     # Reshape tensor to (1, 84, 4032)
                     tensor = tensor.reshape(1, 84, 4032)
-                    
+
                     # Process detections
                     valid_detections = self.process_detections(tensor)
-                    
+
                     # Draw results
-                    frame = self.draw_detections(frame, valid_detections, frame_width, frame_height, fps)
-                    
+                    frame = self.draw_detections(
+                        frame, valid_detections, frame_width, frame_height, fps
+                    )
+
                     # Show frame
                     cv2.imshow("Object Detection", frame)
-                    
+
                     print(f"Valid detections: {len(valid_detections)} | FPS: {fps:.1f}")
-                
+
                 if cv2.waitKey(1) == ord("q"):
                     break
-        
+
         finally:
             cv2.destroyAllWindows()
 
     def process_detections(self, tensor: np.ndarray) -> list:
         """
         Process neural network output tensor and filter detections.
-        
+
         Args:
             tensor: Neural network output tensor of shape (1, 84, 4032)
-        
+
         Returns:
             List of valid detections
         """
@@ -109,53 +119,62 @@ class detectionPipeline():
             # Get bounding box and class scores for this grid cell
             bbox = tensor[0, :4, i]
             class_scores = tensor[0, 4:, i]
-            
+
             # Find max confidence and corresponding class
             max_confidence = np.max(class_scores)
             predicted_class = np.argmax(class_scores)
-            
+
             # Filter by confidence threshold and class IDs
             if max_confidence > CONFIDENCE_THRESHOLD and predicted_class in CLASS_IDS:
-                valid_detections.append({
-                    'grid_cell': i,
-                    'class': predicted_class,
-                    'confidence': max_confidence,
-                    'bbox': bbox
-                })
-        
+                valid_detections.append(
+                    {
+                        "grid_cell": i,
+                        "class": predicted_class,
+                        "confidence": max_confidence,
+                        "bbox": bbox,
+                    }
+                )
+
         return valid_detections
 
-    def draw_detections(self, frame: np.ndarray, detections: list, frame_width: int, frame_height: int, fps: float) -> np.ndarray:
+    def draw_detections(
+        self,
+        frame: np.ndarray,
+        detections: list,
+        frame_width: int,
+        frame_height: int,
+        fps: float,
+    ) -> np.ndarray:
         """
         Draw bounding boxes and labels on the frame.
-        
+
         Args:
             frame: Input frame
             detections: List of detection dictionaries
             frame_width: Frame width
             frame_height: Frame height
             fps: Current FPS
-        
+
         Returns:
             Frame with drawn detections
         """
         for det in detections:
             # YOLOv8 outputs are in absolute pixel coordinates
-            x_center, y_center, width, height = det['bbox']
-            
+            x_center, y_center, width, height = det["bbox"]
+
             # Convert center coordinates to top-left corner
             x1 = int(x_center - width / 2)
             y1 = int(y_center - height / 2)
             x2 = int(x_center + width / 2)
             y2 = int(y_center + height / 2)
-            
+
             # Draw bounding box
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            
+
             # Draw label with class name and confidence
-            class_name = COCO_CLASSES.get(det['class'], f"Class {det['class']}")
+            class_name = COCO_CLASSES.get(det["class"], f"Class {det['class']}")
             label = f"{class_name}: {det['confidence']:.2f}"
-            
+
             # Draw label background
             (label_width, label_height), baseline = cv2.getTextSize(
                 label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1
@@ -165,9 +184,9 @@ class detectionPipeline():
                 (x1, y1 - label_height - baseline - 5),
                 (x1 + label_width, y1),
                 (0, 255, 0),
-                -1
+                -1,
             )
-            
+
             # Draw label text
             cv2.putText(
                 frame,
@@ -176,11 +195,13 @@ class detectionPipeline():
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
                 (0, 0, 0),
-                1
+                1,
             )
-        
+
         # Display detection count and FPS
         info_text = f"Detections: {len(detections)} | FPS: {fps:.1f}"
-        cv2.putText(frame, info_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        
+        cv2.putText(
+            frame, info_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
+        )
+
         return frame

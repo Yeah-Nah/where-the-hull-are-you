@@ -2,8 +2,10 @@ import cv2
 import depthai as dai
 from pathlib import Path
 
+
 class videoFeedProcessor:
     """Processor for handling video replay input and processing."""
+
     def __init__(self, video_path: Path):
         """Initialize the video feed processor."""
         self.video_path = video_path
@@ -23,7 +25,7 @@ class videoFeedProcessor:
 
     def video_feed_connect(self):
         """Connect to the video feed.
-        
+
         Returns:
             tuple: (pipeline, cam_out, video_queue)
         """
@@ -35,8 +37,12 @@ class videoFeedProcessor:
         replay.setReplayVideoFile(Path(self.video_path))
 
         # Setup neural network input/output
-        cam_out = replay.requestOutput((width, height), dai.ImgFrame.Type.BGR888p, fps=30)
-        video_out = replay.requestOutput((width, height), dai.ImgFrame.Type.BGR888p, fps=30)
+        cam_out = replay.requestOutput(
+            (width, height), dai.ImgFrame.Type.BGR888p, fps=30
+        )
+        video_out = replay.requestOutput(
+            (width, height), dai.ImgFrame.Type.BGR888p, fps=30
+        )
         video_queue = video_out.createOutputQueue()
 
         return self.pipeline, cam_out, video_queue
