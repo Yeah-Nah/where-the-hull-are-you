@@ -8,13 +8,13 @@ from pathlib import Path
 
 from src.config.model_settings import MODEL_BLOB
 from src.config.settings import INPUT_DIR
-from src.detection.detection_pipeline import detectionPipeline
+from src.detection.detection_pipeline import DetectionPipeline
 
-scriptDir = Path(__file__).resolve().parent
-examplesRoot = (
-    scriptDir / Path("../oakd-camera-replay")
+script_dir = Path(__file__).resolve().parent
+examples_root = (
+    script_dir / Path("../oakd-camera-tracking")
 ).resolve()  # This resolves the parent directory correctly
-models = examplesRoot / "src" / "models"
+models = examples_root / "src" / "models"
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--inputVideo", default=INPUT_DIR, help="Input video name")
@@ -24,7 +24,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Create and run detection pipeline
-detection_pipeline = detectionPipeline(
+detection_pipeline = DetectionPipeline(
     input_video=args.inputVideo,
     use_camera=args.camera,
     model_path=models / MODEL_BLOB,

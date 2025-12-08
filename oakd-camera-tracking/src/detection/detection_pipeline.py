@@ -6,11 +6,11 @@ import cv2
 import depthai as dai
 import numpy as np
 from src.config.model_settings import CLASS_IDS, COCO_CLASSES, CONFIDENCE_THRESHOLD
-from src.processors.camera_feed_proccessor import cameraFeedProcessor
-from src.processors.video_replay_processor import videoFeedProcessor
+from src.processors.camera_feed_proccessor import CameraFeedProcessor
+from src.processors.video_replay_processor import VideoFeedProcessor
 
 
-class detectionPipeline:
+class DetectionPipeline:
     """Runs required detection pipeline on given input feed. Either video replay or camera feed."""
 
     def __init__(
@@ -34,11 +34,11 @@ class detectionPipeline:
         """Run the required detection pipeline."""
         # Get pipeline and queues from appropriate processor
         if self.use_camera:
-            processor = cameraFeedProcessor()
+            processor = CameraFeedProcessor()
             self.pipeline, cam_out, self.video_queue = processor.camera_feed_connect()
 
         elif self.input_video is not None:
-            processor = videoFeedProcessor(video_path=self.input_video)
+            processor = VideoFeedProcessor(video_path=self.input_video)
             self.pipeline, cam_out, self.video_queue = processor.video_feed_connect()
         else:
             raise ValueError(
@@ -62,10 +62,10 @@ class detectionPipeline:
         try:
             while self.pipeline.isRunning():
                 # Get video frame
-                videoFrame = self.video_queue.tryGet()
-                inNNData = self.nn_queue.tryGet()
+                video_frame = self.video_queue.tryGet()
+                in_nn_data = self.nn_queue.tryGet()
 
-                if videoFrame is not None and inNNData is not None:
+                if video_frame is not None and in_nn_data is not None:
                     # Calculate FPS
                     current_time = time.time()
                     fps = (
@@ -75,11 +75,11 @@ class detectionPipeline:
                     )
                     prev_time = current_time
 
-                    assert isinstance(videoFrame, dai.ImgFrame)
-                    frame = videoFrame.getCvFrame()
+                    assert isinstance(video_frame, dai.ImgFrame)
+                    frame = video_frame.getCvFrame()
                     frame_height, frame_width = frame.shape[:2]
 
-                    tensor = inNNData.getFirstTensor()
+                    tensor = in_nn_data.getFirstTensor()
                     assert isinstance(tensor, np.ndarray)
 
                     # Reshape tensor to (1, 84, 4032)

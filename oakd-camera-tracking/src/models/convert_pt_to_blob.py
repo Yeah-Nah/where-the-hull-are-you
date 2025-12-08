@@ -65,7 +65,7 @@ def convert_pt_to_blob(
         blob_path = output_path / f"{model_name}.blob"
 
         # Convert using blobconverter
-        blob_path_str = blobconverter.from_onnx(
+        blobconverter.from_onnx(
             model=str(onnx_path),
             output_dir=str(output_path),
             shaves=shaves,
@@ -98,6 +98,7 @@ def convert_pt_to_blob(
 
 
 def main():
+    """Run pipeline to convert .pt model to blobl format."""
     parser = argparse.ArgumentParser(
         description="Convert YOLOv8 .pt model to .blob format for OAK-D cameras"
     )

@@ -4,7 +4,7 @@ import cv2
 import depthai as dai
 
 
-class videoFeedProcessor:
+class VideoFeedProcessor:
     """Processor for handling video replay input and processing."""
 
     def __init__(self, video_path: Path):

@@ -2,7 +2,7 @@ import depthai as dai
 from src.config.camera_settings import CAM_HEIGHT, CAM_WIDTH
 
 
-class cameraFeedProcessor:
+class CameraFeedProcessor:
     """Processor for handling camera feed input and processing."""
 
     def __init__(self):
