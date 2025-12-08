@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Detection pipeline for processing video or camera feed using OAK-D and given model."""
+
 import time
 from pathlib import Path
 
@@ -8,6 +9,7 @@ import depthai as dai
 import numpy as np
 from src.config.model_settings import CLASS_IDS, COCO_CLASSES, CONFIDENCE_THRESHOLD
 from src.processors.camera_feed_proccessor import CameraFeedProcessor
+
 
 class DetectionPipeline:
     """Runs required detection pipeline on given input feed. Either video replay or camera feed."""
@@ -37,9 +39,7 @@ class DetectionPipeline:
             self.pipeline, cam_out, self.video_queue = processor.camera_feed_connect()
 
         else:
-            raise ValueError(
-                "You got a problem yo."
-            )
+            raise ValueError("You got a problem yo.")
 
         # Add neural network to the pipeline
         nn = self.pipeline.create(dai.node.NeuralNetwork)

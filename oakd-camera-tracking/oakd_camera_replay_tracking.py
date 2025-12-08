@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from src.config.model_settings import MODEL_BLOB
-from src.config.settings import INPUT_DIR
 from src.detection.detection_pipeline import DetectionPipeline
 
 script_dir = Path(__file__).resolve().parent
