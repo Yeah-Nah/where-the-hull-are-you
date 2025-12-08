@@ -49,3 +49,10 @@
 - DuckVision
 - TheOrangeDuck
 - Unity
+
+## Spit Balling
+
+- Custom model training
+- Tracking metrics reusable python package
+- Fusion modelling
+- Get hands on camera IMU
