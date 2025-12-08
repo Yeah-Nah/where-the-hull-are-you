@@ -1,7 +1,8 @@
-# Configuration settings for the boat tracking system
-import yaml
-import os
+"""Configuration settings for the boat tracking system."""
+
 from pathlib import Path
+
+import yaml
 
 # Get project root (2 levels up from this file)
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -17,8 +18,4 @@ OUTPUT_DIR = Path(config.get("output_directory", ""))
 
 # MLflow settings
 MLFLOW_TRACKING_URI = config.get("mlflow_tracking_uri", "file:./mlruns")
-MLFLOW_EXPERIMENT_NAME = config.get(
-    "mlflow_experiment_name", None
-)
-
-
+MLFLOW_EXPERIMENT_NAME = config.get("mlflow_experiment_name", None)
