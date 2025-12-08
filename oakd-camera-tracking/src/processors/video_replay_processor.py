@@ -1,3 +1,5 @@
+"""Processor for handling video replay input and processing."""
+
 from pathlib import Path
 
 import cv2

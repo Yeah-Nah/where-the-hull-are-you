@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Detection pipeline for processing video or camera feed using OAK-D and given model."""
 import time
 from pathlib import Path
 

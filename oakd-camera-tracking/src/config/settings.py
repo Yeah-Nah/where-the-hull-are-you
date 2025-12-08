@@ -1,4 +1,4 @@
-# Configuration settings for the boat tracking system
+"""Configuration settings for the boat tracking system."""
 from pathlib import Path
 
 import yaml

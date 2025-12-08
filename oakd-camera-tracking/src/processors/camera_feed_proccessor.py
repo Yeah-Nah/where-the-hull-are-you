@@ -1,3 +1,5 @@
+"""Processor for handling camera feed input and processing."""
+
 import depthai as dai
 from src.config.camera_settings import CAM_HEIGHT, CAM_WIDTH
 
@@ -17,15 +19,15 @@ class CameraFeedProcessor:
             tuple: (pipeline, cam_out, video_queue)
         """
         # Define sources and outputs
-        camRgb = self.pipeline.create(dai.node.Camera).build(
+        cam_rgb = self.pipeline.create(dai.node.Camera).build(
             dai.CameraBoardSocket.CAM_B
         )
 
         # Setup neural network input/output
-        cam_out = camRgb.requestOutput(
+        cam_out = cam_rgb.requestOutput(
             (CAM_WIDTH, CAM_HEIGHT), dai.ImgFrame.Type.BGR888p, fps=30
         )
-        video_out = camRgb.requestOutput(
+        video_out = cam_rgb.requestOutput(
             (CAM_WIDTH, CAM_HEIGHT), dai.ImgFrame.Type.BGR888p, fps=30
         )
         video_queue = video_out.createOutputQueue()

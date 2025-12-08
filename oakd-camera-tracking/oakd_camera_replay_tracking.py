@@ -1,7 +1,4 @@
-# Just test file for tracking an object in a replayed oak-d camera feed
-
-#!/usr/bin/env python3
-
+#!/usr/bin/env python3 # noqa
 
 from argparse import ArgumentParser
 from pathlib import Path
