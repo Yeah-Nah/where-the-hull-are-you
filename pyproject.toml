@@ -28,6 +28,7 @@ dependencies = [
     "matplotlib",
     "mlflow>=2.10.0",
     "depthai>=3.2.1",
+    "tracking-metrics @ file:../shared-tracking-metrics",
 ]
 
 # Optional dependencies for different use cases

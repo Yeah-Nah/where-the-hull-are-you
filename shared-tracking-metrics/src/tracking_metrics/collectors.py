@@ -1,7 +1,7 @@
 """Collect detections and tracks over time for metrics calculation."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 
 @dataclass
@@ -33,18 +33,39 @@ class TrackingMetricsCollector:
         self.detections: List[Detection] = []
         self.tracks: Dict[int, Track] = {}
         self.frame_count: int = 0
+        self.confidences: List[float] = []
+        self.bbox_areas: List[float] = []
 
-    def add_frame_detections(self, frame_id: int, detections: List[Dict[str, Any]]):
-        """Add detections from a single frame.
+    def add_frame_detections(
+        self, detections: List[Dict], frame_shape: Tuple[int, int] = None
+    ):
+        """
+        Add detection data from a single frame.
 
         Parameters
         ----------
-        frame_id : int
-            Frame number
-        detections : List[Dict[str, Any]]
-            List of detections with keys: track_id, bbox, confidence, class_id
+        detections : List[Dict]
+            List of detection dictionaries with keys:
+            - 'track_id': int
+            - 'bbox': [x1, y1, x2, y2]
+            - 'confidence': float
+            - 'class_id': int (optional)
+        frame_shape : Tuple[int, int], optional
+            Frame (height, width) for bbox normalization
         """
-        pass
+        self.frame_count += 1
+
+        for det in detections:
+            # Store confidence
+            self.confidences.append(det["confidence"])
+
+            # Normalize and store bbox area if frame shape provided
+            if frame_shape is not None:
+                # height, width = frame_shape
+                # normalized_area = normalize_bbox_area(det["bbox"], width, height)
+                self.bbox_areas.append(frame_shape)
+            else:
+                self.bbox_areas.append(frame_shape)
 
     def add_track(self, track_id: int, track_data: Dict[str, Any]):
         """Add or update a track.
