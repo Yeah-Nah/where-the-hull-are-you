@@ -111,8 +111,11 @@ class UnlabeledEvaluator:
                 # Use the inference instance to predict
                 detections = self.inference.predict_frame(frame)
                 
-                # Collect detections for metrics
-                self.collector.add_frame_detections(detections)
+                # Process all detections
+                for det in detections:
+                    self.collector.add_detection_with_track(det, frame_id)
+                
+                self.collector.frame_count += 1
                 
                 if frame_id % 100 == 0:
                     logger.debug(f"Processed frame {frame_id}")

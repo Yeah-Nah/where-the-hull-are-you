@@ -35,67 +35,53 @@ class TrackingMetricsCollector:
         self.frame_count: int = 0
         self.confidences: List[float] = []
         self.bbox_areas: List[float] = []
+        
+        # Track data
+        self.track_history: Dict[int, List[int]] = {}  # track_id -> [frame_numbers]
+        self.track_bboxes: Dict[int, Dict[int, List[float]]] = {}  # track_id -> {frame_num -> bbox}
+        self.all_track_ids: List[int] = []
 
-    def add_frame_detections(
-        self, detections: List[Dict], frame_shape: Tuple[int, int] = None
+    def add_detection_with_track(
+        self, 
+        detection: Dict, 
+        frame_id: int, 
+        frame_shape: Tuple[int, int] = None
     ):
-        """
-        Add detection data from a single frame.
-
+        """Add detection and update track for a single frame.
+        
         Parameters
         ----------
-        detections : List[Dict]
-            List of detection dictionaries with keys:
-            - 'track_id': int
+        detection : Dict
+            Detection dictionary with keys:
             - 'bbox': [x1, y1, x2, y2]
             - 'confidence': float
+            - 'track_id': int (optional)
             - 'class_id': int (optional)
+        frame_num : int
+            Current frame number
         frame_shape : Tuple[int, int], optional
             Frame (height, width) for bbox normalization
         """
-        self.frame_count += 1
-
-        for det in detections:
-            # Store confidence
-            self.confidences.append(det["confidence"])
-
-            # Normalize and store bbox area if frame shape provided
-            if frame_shape is not None:
-                # height, width = frame_shape
-                # normalized_area = normalize_bbox_area(det["bbox"], width, height)
-                self.bbox_areas.append(frame_shape)
-            else:
-                self.bbox_areas.append(det["bbox"])
-
-    def add_track(self, track_id: int, track_data: Dict[str, Any]):
-        """Add or update a track.
-
-        Parameters
-        ----------
-        track_id : int
-            Unique track identifier
-        track_data : Dict[str, Any]
-            Track information
-        """
-        pass
-
-    def get_active_tracks(self, frame_id: int) -> List[Track]:
-        """Get tracks active at a specific frame.
-
-        Parameters
-        ----------
-        frame_id : int
-            Frame number
-
-        Returns
-        -------
-        List[Track]
-            Active tracks at the frame
-        """
-        pass
+        # Collect detection data
+        self.confidences.append(detection["confidence"])
+        self.bbox_areas.append(detection["bbox"])
+        
+        # Collect track data if track_id exists
+        track_id = detection.get('track_id')
+        if track_id is not None:
+            if track_id not in self.track_history:
+                self.track_history[track_id] = []
+                self.track_bboxes[track_id] = {}
+            
+            self.track_history[track_id].append(frame_id)
+            self.track_bboxes[track_id][frame_id] = detection["bbox"]
+            self.all_track_ids.append(track_id)
 
     def reset(self):
         """Reset all collected data."""
         self.detections.clear()
         self.tracks.clear()
         self.frame_count = 0
+        self.track_history.clear()
+        self.track_bboxes.clear()
+        self.all_track_ids.clear()

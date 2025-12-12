@@ -38,6 +38,13 @@ class MetricsCalculator:
         """
         pass
 
+    def compute_bbox_area(self) -> Dict[str, float]:
+        """Calculate the bounding box area for the given coordinates.
+
+        Returns:
+            Dict[str, float]: _description_
+        """
+
     def compute_bbox_stability(self) -> Dict[str, float]:
         """Compute bounding box stability metrics.
 
@@ -60,6 +67,21 @@ class MetricsCalculator:
         -------
         float
             MOTA score (only if ground truth provided)
+        """
+        pass
+
+    def compute_short_track_ratio(self, threshold: int = 5) -> float:
+        """_summary_
+
+        Parameters
+        ----------
+            threshold : int, optional
+                _description_, by default 5
+
+        Returns
+        -------
+            float
+                _description_
         """
         pass
 
