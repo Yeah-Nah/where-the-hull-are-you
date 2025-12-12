@@ -58,7 +58,7 @@ class UnlabeledEvaluator:
         }
 
     def _read_video(self, cap):
-        """Helper to read video frames.
+        """Read video frames helper.
 
         Yields
         ------

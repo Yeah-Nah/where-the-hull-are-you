@@ -13,7 +13,7 @@ def test_tracking_metrics_collector_init():
 
 def test_add_frame_detections():
     """Test adding frame detections."""
-    collector = TrackingMetricsCollector()
+    # collector = TrackingMetricsCollector()
     # TODO: Implement test
     pass
 

@@ -123,7 +123,7 @@ class MetricsCalculator:
             }
 
         all_jitters = []
-        for track_id, frame_bboxes in self.collector.track_bboxes.items():
+        for _, frame_bboxes in self.collector.track_bboxes.items():
             sorted_frames = sorted(frame_bboxes.keys())
             if len(sorted_frames) < 2:
                 continue

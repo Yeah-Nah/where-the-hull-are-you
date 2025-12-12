@@ -1,3 +1,4 @@
+"""Generic YOLO inference - works on any frame."""
 # shared-tracking-metrics/src/tracking_metrics/inference.py
 from typing import Any
 
