@@ -2,5 +2,5 @@ model_config:
   conf: 0.5 # Detection confidence threshold
   classes: [0, 8] # Class IDs to detect (e.g., 0 for person, 8 for boat)
   persist: True # Persist tracks across frames
-  verbose: True # Disable verbose output
+  verbose: False # Disable verbose output
 model: "yolov8n.pt"

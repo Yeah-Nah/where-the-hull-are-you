@@ -104,7 +104,7 @@ class UnlabeledEvaluator:
             self.collector.reset()
 
             cap = self._initiate_cap(video_path)
-            video_props = self._get_video_properties(cap)
+            # video_props = self._get_video_properties(cap)
             
             # Read video and run inference on each frame
             for frame_id, frame in self._read_video(cap):
@@ -121,8 +121,9 @@ class UnlabeledEvaluator:
                     logger.debug(f"Processed frame {frame_id}")
             
             # Compute and return metrics
-            metrics = self.compute_metrics()
-            logger.info(f"Evaluation complete: {metrics}")
+            logger.info("Computing metrics...")
+            metrics = self.calculator.compute_all_metrics()
+            logger.success(f"Evaluation complete: {metrics}")
             return metrics
 
     def evaluate_batch(
@@ -141,15 +142,5 @@ class UnlabeledEvaluator:
         -------
         Dict[str, float]
             Confidence-based metrics (no ground truth required)
-        """
-        pass
-
-    def compute_metrics(self) -> Dict[str, float]:
-        """Compute confidence-based metrics from collected data.
-
-        Returns
-        -------
-        Dict[str, float]
-            Computed metrics
         """
         pass
