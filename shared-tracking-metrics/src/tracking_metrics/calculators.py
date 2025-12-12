@@ -1,7 +1,6 @@
 """Calculate tracking metrics from collected data."""
 
 import numpy as np
-from typing import Dict, List, Optional
 
 from .collectors import Track, TrackingMetricsCollector
 
@@ -19,7 +18,7 @@ class MetricsCalculator:
         """
         self.collector = collector
 
-    def compute_confidence_metrics(self) -> Dict[str, float]:
+    def compute_confidence_metrics(self) -> dict[str, float]:
         """Compute detection confidence statistics.
 
         Returns
@@ -34,7 +33,7 @@ class MetricsCalculator:
                 "confidence_min": 0.0,
                 "confidence_max": 0.0,
             }
-        
+
         confidences = np.array(self.collector.confidences)
         return {
             "confidence_mean": float(np.mean(confidences)),
@@ -43,7 +42,7 @@ class MetricsCalculator:
             "confidence_max": float(np.max(confidences)),
         }
 
-    def compute_track_metrics(self) -> Dict[str, float]:
+    def compute_track_metrics(self) -> dict[str, float]:
         """Compute track-based metrics.
 
         Returns
@@ -58,8 +57,10 @@ class MetricsCalculator:
                 "max_track_length": 0,
                 "min_track_length": 0,
             }
-        
-        track_lengths = [len(frames) for frames in self.collector.track_history.values()]
+
+        track_lengths = [
+            len(frames) for frames in self.collector.track_history.values()
+        ]
         return {
             "num_tracks": len(self.collector.track_history),
             "avg_track_length": float(np.mean(track_lengths)),
@@ -67,7 +68,7 @@ class MetricsCalculator:
             "min_track_length": int(np.min(track_lengths)),
         }
 
-    def compute_bbox_area(self) -> Dict[str, float]:
+    def compute_bbox_area(self) -> dict[str, float]:
         """Calculate the bounding box area statistics.
 
         Returns
@@ -82,7 +83,7 @@ class MetricsCalculator:
                 "bbox_area_min": 0.0,
                 "bbox_area_max": 0.0,
             }
-        
+
         # Calculate areas from bboxes [x1, y1, x2, y2]
         areas = []
         for bbox in self.collector.bbox_areas:
@@ -90,7 +91,7 @@ class MetricsCalculator:
                 width = bbox[2] - bbox[0]
                 height = bbox[3] - bbox[1]
                 areas.append(width * height)
-        
+
         if not areas:
             return {
                 "bbox_area_mean": 0.0,
@@ -98,7 +99,7 @@ class MetricsCalculator:
                 "bbox_area_min": 0.0,
                 "bbox_area_max": 0.0,
             }
-        
+
         areas = np.array(areas)
         return {
             "bbox_area_mean": float(np.mean(areas)),
@@ -107,7 +108,7 @@ class MetricsCalculator:
             "bbox_area_max": float(np.max(areas)),
         }
 
-    def compute_bbox_stability(self) -> Dict[str, float]:
+    def compute_bbox_stability(self) -> dict[str, float]:
         """Compute bounding box stability metrics.
 
         Returns
@@ -120,33 +121,35 @@ class MetricsCalculator:
                 "bbox_jitter_mean": 0.0,
                 "bbox_jitter_std": 0.0,
             }
-        
+
         all_jitters = []
         for track_id, frame_bboxes in self.collector.track_bboxes.items():
             sorted_frames = sorted(frame_bboxes.keys())
             if len(sorted_frames) < 2:
                 continue
-            
+
             # Calculate frame-to-frame displacement
             for i in range(len(sorted_frames) - 1):
                 bbox1 = frame_bboxes[sorted_frames[i]]
                 bbox2 = frame_bboxes[sorted_frames[i + 1]]
-                
+
                 # Calculate center displacement
                 center1_x = (bbox1[0] + bbox1[2]) / 2
                 center1_y = (bbox1[1] + bbox1[3]) / 2
                 center2_x = (bbox2[0] + bbox2[2]) / 2
                 center2_y = (bbox2[1] + bbox2[3]) / 2
-                
-                displacement = np.sqrt((center2_x - center1_x)**2 + (center2_y - center1_y)**2)
+
+                displacement = np.sqrt(
+                    (center2_x - center1_x) ** 2 + (center2_y - center1_y) ** 2
+                )
                 all_jitters.append(displacement)
-        
+
         if not all_jitters:
             return {
                 "bbox_jitter_mean": 0.0,
                 "bbox_jitter_std": 0.0,
             }
-        
+
         jitters = np.array(all_jitters)
         return {
             "bbox_jitter_mean": float(np.mean(jitters)),
@@ -168,13 +171,15 @@ class MetricsCalculator:
         """
         if not self.collector.track_history:
             return 0.0
-        
-        track_lengths = [len(frames) for frames in self.collector.track_history.values()]
+
+        track_lengths = [
+            len(frames) for frames in self.collector.track_history.values()
+        ]
         short_tracks = sum(1 for length in track_lengths if length < threshold)
-        
+
         return short_tracks / len(track_lengths)
 
-    def compute_mota(self, ground_truth: Optional[List[Track]] = None) -> float:
+    def compute_mota(self, ground_truth: list[Track] | None = None) -> float:
         """Compute Multiple Object Tracking Accuracy (MOTA).
 
         Parameters
@@ -189,7 +194,7 @@ class MetricsCalculator:
         """
         pass
 
-    def compute_idf1(self, ground_truth: Optional[List[Track]] = None) -> float:
+    def compute_idf1(self, ground_truth: list[Track] | None = None) -> float:
         """Compute ID F1 score.
 
         Parameters
@@ -205,8 +210,8 @@ class MetricsCalculator:
         pass
 
     def compute_all_metrics(
-        self, ground_truth: Optional[List[Track]] = None
-    ) -> Dict[str, float]:
+        self, ground_truth: list[Track] | None = None
+    ) -> dict[str, float]:
         """Compute all available metrics.
 
         Parameters
@@ -219,7 +224,6 @@ class MetricsCalculator:
         Dict[str, float]
             All computed metrics
         """
-
         metrics = {}
         metrics.update(self.compute_confidence_metrics())
         metrics.update(self.compute_track_metrics())

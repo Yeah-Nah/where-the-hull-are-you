@@ -46,7 +46,7 @@ notebook = [
 
 # Console scripts (entry points for command-line tools)
 [project.scripts]
-boat-tracking-system = "main:main"
+oakd-camera-tracking = "main:main"
 
 # URLs for project information
 [project.urls]
@@ -54,9 +54,9 @@ Homepage = "https://github.com/Yeah-Nah/where-the-hull-are-you"
 Repository = "https://github.com/Yeah-Nah/where-the-hull-are-you"
 Issues = "https://github.com/Yeah-Nah/where-the-hull-are-you/issues"
 
-# Setuptools configuration (tells it where to find packages)
+# Setuptools configuration
 [tool.setuptools.packages.find]
-where = ["boat-tracking-system/src"]
+where = ["oakd-camera-tracking/src"]
 
 # Ruff linter configuration
 [tool.ruff]

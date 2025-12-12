@@ -1,8 +1,6 @@
 """Tests for tracking metrics collectors."""
 
-import pytest
-
-from tracking_metrics.collectors import Detection, Track, TrackingMetricsCollector
+from tracking_metrics.collectors import TrackingMetricsCollector
 
 
 def test_tracking_metrics_collector_init():

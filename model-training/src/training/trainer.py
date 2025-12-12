@@ -1,13 +1,13 @@
 """Model training orchestration."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class ModelTrainer:
     """Train custom YOLO models for maritime object detection."""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         """Initialize trainer with configuration.
 
         Parameters
@@ -61,7 +61,7 @@ class ModelTrainer:
         """
         pass
 
-    def validate(self, data_yaml: Path) -> Dict[str, float]:
+    def validate(self, data_yaml: Path) -> dict[str, float]:
         """Validate trained model on validation set.
 
         Parameters

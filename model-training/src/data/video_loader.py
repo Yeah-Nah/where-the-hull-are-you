@@ -1,7 +1,6 @@
 """Load and manage test videos."""
 
 from pathlib import Path
-from typing import List
 
 
 class VideoLoader:
@@ -17,7 +16,7 @@ class VideoLoader:
         """
         self.video_dir = Path(video_dir)
 
-    def get_all_videos(self, extensions: List[str] = None) -> List[Path]:
+    def get_all_videos(self, extensions: list[str] = None) -> list[Path]:
         """Get all video files in directory.
 
         Parameters

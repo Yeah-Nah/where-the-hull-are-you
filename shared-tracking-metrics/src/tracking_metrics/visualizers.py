@@ -1,8 +1,5 @@
 """Visualize tracking metrics on video frames."""
 
-from typing import Dict, Optional
-
-import cv2
 import numpy as np
 
 from .collectors import TrackingMetricsCollector
@@ -56,7 +53,7 @@ class MetricsVisualizer:
         pass
 
     def draw_metrics_overlay(
-        self, frame: np.ndarray, metrics: Dict[str, float]
+        self, frame: np.ndarray, metrics: dict[str, float]
     ) -> np.ndarray:
         """Draw metrics as text overlay on frame.
 

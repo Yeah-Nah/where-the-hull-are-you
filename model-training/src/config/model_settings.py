@@ -12,7 +12,7 @@ with open(MODEL_CONFIG_FILE) as f:
     model_config = yaml.safe_load(f)
 
 MODEL = model_config.get("model", "yolov8n_openvino_2022.1_6shave.blob")
-MODEL_PATH = BASE_DIR/ Path("models") / MODEL
+MODEL_PATH = BASE_DIR / Path("models") / MODEL
 MODEL_CONFIG = model_config.get("model_config", {})
 
 # COCO class names for display

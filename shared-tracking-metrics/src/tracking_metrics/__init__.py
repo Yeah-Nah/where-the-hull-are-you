@@ -1,9 +1,9 @@
 """Shared tracking metrics package for boat tracking projects."""
 
-from .collectors import TrackingMetricsCollector
 from .calculators import MetricsCalculator
-from .visualizers import MetricsVisualizer
+from .collectors import TrackingMetricsCollector
 from .loggers import MLflowMetricsLogger
+from .visualizers import MetricsVisualizer
 
 __all__ = [
     "TrackingMetricsCollector",

@@ -1,7 +1,5 @@
 """Tests for metrics calculators."""
 
-import pytest
-
 from tracking_metrics.calculators import MetricsCalculator
 from tracking_metrics.collectors import TrackingMetricsCollector
 

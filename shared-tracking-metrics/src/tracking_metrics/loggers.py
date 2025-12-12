@@ -1,12 +1,12 @@
 """MLflow integration for logging tracking metrics."""
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class MLflowMetricsLogger:
     """Log tracking metrics to MLflow."""
 
-    def __init__(self, experiment_name: str, run_name: Optional[str] = None):
+    def __init__(self, experiment_name: str, run_name: str | None = None):
         """Initialize MLflow logger.
 
         Parameters
@@ -23,7 +23,7 @@ class MLflowMetricsLogger:
         """Start a new MLflow run."""
         pass
 
-    def log_metrics(self, metrics: Dict[str, float], step: Optional[int] = None):
+    def log_metrics(self, metrics: dict[str, float], step: int | None = None):
         """Log metrics to MLflow.
 
         Parameters
@@ -35,7 +35,7 @@ class MLflowMetricsLogger:
         """
         pass
 
-    def log_params(self, params: Dict[str, Any]):
+    def log_params(self, params: dict[str, Any]):
         """Log parameters to MLflow.
 
         Parameters

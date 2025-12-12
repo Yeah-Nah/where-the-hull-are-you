@@ -1,7 +1,6 @@
 """Evaluator for labeled data with ground truth."""
 
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.collectors import Track
@@ -27,7 +26,7 @@ class LabeledEvaluator:
         """Load the model."""
         pass
 
-    def load_ground_truth(self, ground_truth_path: Path) -> List[Track]:
+    def load_ground_truth(self, ground_truth_path: Path) -> list[Track]:
         """Load ground truth annotations.
 
         Parameters
@@ -42,7 +41,7 @@ class LabeledEvaluator:
         """
         pass
 
-    def evaluate(self, data_yaml: Path) -> Dict[str, float]:
+    def evaluate(self, data_yaml: Path) -> dict[str, float]:
         """Evaluate model on labeled dataset.
 
         Parameters
@@ -58,8 +57,8 @@ class LabeledEvaluator:
         pass
 
     def evaluate_with_ground_truth(
-        self, video_path: Path, ground_truth: List[Track]
-    ) -> Dict[str, float]:
+        self, video_path: Path, ground_truth: list[Track]
+    ) -> dict[str, float]:
         """Evaluate model on single video with ground truth.
 
         Parameters
