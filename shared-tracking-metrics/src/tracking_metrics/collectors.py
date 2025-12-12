@@ -65,7 +65,7 @@ class TrackingMetricsCollector:
                 # normalized_area = normalize_bbox_area(det["bbox"], width, height)
                 self.bbox_areas.append(frame_shape)
             else:
-                self.bbox_areas.append(frame_shape)
+                self.bbox_areas.append(det["bbox"])
 
     def add_track(self, track_id: int, track_data: Dict[str, Any]):
         """Add or update a track.

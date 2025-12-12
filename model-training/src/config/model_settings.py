@@ -11,10 +11,9 @@ MODEL_CONFIG_FILE = BASE_DIR / "config" / "model_config.yaml"
 with open(MODEL_CONFIG_FILE) as f:
     model_config = yaml.safe_load(f)
 
-MODEL_BLOB = model_config.get("model_blob", "yolov8n_openvino_2022.1_6shave.blob")
-MODEL_PATH = BASE_DIR/ Path("models") / MODEL_BLOB
-CLASS_IDS = model_config.get("class_ids", [0, 8])
-CONFIDENCE_THRESHOLD = model_config.get("confidence_threshold", 0.5)
+MODEL = model_config.get("model", "yolov8n_openvino_2022.1_6shave.blob")
+MODEL_PATH = BASE_DIR/ Path("models") / MODEL
+MODEL_CONFIG = model_config.get("model_config", {})
 
 # COCO class names for display
 COCO_CLASSES = {

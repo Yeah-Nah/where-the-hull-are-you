@@ -13,20 +13,56 @@ from tracking_metrics.inference import ModelInference
 class UnlabeledEvaluator:
     """Evaluate model performance on unlabeled data."""
 
-    def __init__(self, model_path: Path):
+    def __init__(self, model_path: Path, model_config: Dict):
         """Initialize evaluator with model.
 
         Parameters
         ----------
         model_path : Path
             Path to model weights
+        model_config : Dict
+            Model configuration parameters
         """
         self.model_path = model_path
-        self.inference = ModelInference(str(model_path))
+        self.model_config = model_config
+        self.inference = ModelInference(
+            model_path=str(model_path),
+            model_config=model_config
+        )
         self.collector = TrackingMetricsCollector()
         self.calculator = MetricsCalculator(self.collector)
 
-    def _read_video(self, video_path: Path):
+    def _initiate_cap(self, video_path: str):
+        """Inititate the video capture cv2 object."""
+
+        cap = cv2.VideoCapture(str(video_path))
+        if not cap.isOpened():
+            raise ValueError(f"Could not open video: {video_path}")
+        
+        return cap
+
+    def _get_video_properties(self, cap: cv2.VideoCapture) -> Dict[str, int]:
+        """Get video properties efficiently.
+        
+        Parameters
+        ----------
+        cap : cv2.VideoCapture
+            Opened video capture object
+            
+        Returns
+        -------
+        Dict[str, int]
+            Video properties (width, height, fps, frame_count)
+        """
+
+        return {
+            "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            "fps": int(cap.get(cv2.CAP_PROP_FPS)),
+            "frame_count": int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        }
+    
+    def _read_video(self, cap):
         """Helper to read video frames.
         
         Yields
@@ -34,9 +70,6 @@ class UnlabeledEvaluator:
         Tuple[int, np.ndarray]
             (frame_id, frame)
         """
-        cap = cv2.VideoCapture(str(video_path))
-        if not cap.isOpened():
-            raise ValueError(f"Could not open video: {video_path}")
         
         try:
             frame_id = 0
@@ -50,7 +83,8 @@ class UnlabeledEvaluator:
             cap.release()
 
     def evaluate_single_video(
-            self, video_path: Path, tracker_config: str = "botsort.yaml"
+            self,
+            video_path: Path,
         ) -> Dict[str, float]:
             """Evaluate model on single video.
             
@@ -68,9 +102,12 @@ class UnlabeledEvaluator:
             """
             logger.info(f"Evaluating video: {video_path}")
             self.collector.reset()
+
+            cap = self._initiate_cap(video_path)
+            video_props = self._get_video_properties(cap)
             
             # Read video and run inference on each frame
-            for frame_id, frame in self._read_video(video_path):
+            for frame_id, frame in self._read_video(cap):
                 # Use the inference instance to predict
                 detections = self.inference.predict_frame(frame)
                 
