@@ -30,7 +30,7 @@ from tracking_metrics import TrackingMetricsCollector, MetricsCalculator
 
 # Collect tracking data
 collector = TrackingMetricsCollector()
-collector.add_frame_detections(frame_id=0, detections=[...])
+collector.add_detection_with_track(frame_id=0, detections=[...])
 
 # Calculate metrics
 calculator = MetricsCalculator(collector)

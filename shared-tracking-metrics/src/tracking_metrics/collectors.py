@@ -55,14 +55,16 @@ class TrackingMetricsCollector:
             - 'confidence': float
             - 'track_id': int (optional)
             - 'class_id': int (optional)
-        frame_num : int
+        frame_id : int
             Current frame number
         frame_shape : Tuple[int, int], optional
             Frame (height, width) for bbox normalization
         """
         # Collect detection data
         self.confidences.append(detection["confidence"])
-        self.bbox_areas.append(detection["bbox"])
+        bbox = detection["bbox"]
+        area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
+        self.bbox_areas.append(area)
 
         # Collect track data if track_id exists
         track_id = detection.get("track_id")
@@ -83,3 +85,5 @@ class TrackingMetricsCollector:
         self.track_history.clear()
         self.track_bboxes.clear()
         self.all_track_ids.clear()
+        self.confidences.clear()
+        self.bbox_areas.clear()

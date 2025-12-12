@@ -5,9 +5,6 @@ from typing import Any
 import numpy as np
 from ultralytics import YOLO
 
-"""Generic YOLO inference - works on any frame."""
-
-
 class ModelInference:
     """Generic YOLO inference - works on any frame."""
 
