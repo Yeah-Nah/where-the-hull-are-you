@@ -23,9 +23,5 @@
 - [ ] Documentation updated (README/config/examples)
 - [ ] No secrets or credentials committed
 
-## Linked Issues
-- Closes #<issue-number>
-- Related to #<issue-number>
-
 ## Notes for Reviewers
 - Call out tricky areas, trade-offs, or follow-ups

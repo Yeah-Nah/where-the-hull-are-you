@@ -117,7 +117,10 @@ class UnlabeledEvaluator:
         # Compute and return metrics
         logger.info("Computing metrics...")
         metrics = self.calculator.compute_all_metrics()
-        logger.success(f"Evaluation complete: {metrics}")
+        logger.success("Results:")
+        for metric_name, value in metrics.items():
+            logger.success(f"  {metric_name}: {value:.4f}")
+
         return metrics
 
     def evaluate_batch(
