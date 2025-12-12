@@ -1,141 +1,132 @@
-# where-the-hull-are-you
-Basic boat detection and tracking using open-source models. The goal of this project is to teach me the basics of robotics, and expand my Data Science and ML experience into the image recognition realm.
+# Where The Hull Are You
 
-## Project Goal:
-Develop a program that can identify and track and object real time, using data from multiple sensor sources (cameras, radar, Lidar, IMUs).
+A real-time maritime object detection and tracking system built for embedded vision hardware. This project explores the intersection of computer vision, robotics, and edge AI by developing a complete pipeline from model training to deployment on OAK-D cameras.
 
-### Learning Goals:
-Inspiration taken from the Greenroom Robotics Senior ML / Robotics Enigneer Role
-- ROS2
-- Sensor fusion algorithms for data from multiple sources
-- Containerisation and dockerisation tools
-- OAK-D
-- Lidar sensors
+## Project Vision
 
-## Features
-- **Boat Detection**: Identify boats in still images
-- **Boat Tracking**: Track boats across video frames with unique IDs
-- **Easy to Use**: Simple API with clear examples
-- **Pre-trained Models**: Uses YOLOv8 trained on COCO dataset
+Develop an intelligent system capable of detecting and tracking boats in real-time using custom-trained models deployed on edge devices. The project emphasizes practical robotics skills, sensor integration, and modern ML workflows.
 
-## Installation
+### Learning Objectives
 
-1. Clone this repository:
-```bash
-git clone https://github.com/Yeah-Nah/where-the-hull-are-you.git
-cd where-the-hull-are-you
-```
+Inspired by advanced robotics and ML engineering roles, this project focuses on:
+- **Edge AI Deployment**: Running custom models on OAK-D camera hardware
+- **Model Training & Evaluation**: Training YOLOv8 models on maritime datasets with comprehensive evaluation
+- **Experiment Tracking**: MLflow integration for reproducible ML workflows
+- **Modular Architecture**: Shared metrics libraries and clean separation of concerns
+- **Future Direction**: ROS2, sensor fusion, and multi-modal tracking
 
-2. Install required dependencies:
-```bash
-pip install -r requirements.txt
-```
+## Architecture Overview
 
-Note: On first run, YOLOv8 will automatically download the pre-trained model (~6MB).
+The project is organized into three main components:
 
-## Quick Start
+### 1. **Model Training Pipeline** ([`model-training/`](model-training))
+- Train custom YOLOv8 models for maritime object detection
+- Evaluate models on labeled and unlabeled boat footage
+- Compare performance metrics (mAP, precision, recall, confidence)
+- Select optimal models for deployment
 
-### Using the Demo Script
+**Key Features:**
+- Custom training workflows with configurable hyperparameters
+- Dual evaluation strategy (labeled ground truth + unlabeled confidence metrics)
+- MLflow integration for experiment tracking
+- Model export to OAK-D compatible formats
 
-The easiest way to get started is using the demo script:
+### 2. **Shared Tracking Metrics** ([`shared-tracking-metrics/`](shared-tracking-metrics))
+- Reusable metrics library for tracking quality assessment
+- Unified interface across training, evaluation, and deployment
+- Collectors, calculators, visualizers, and MLflow loggers
 
-```bash
-# For images
-python demo.py path/to/your/image.jpg
+**Key Features:**
+- MOTA, IDF1, and custom tracking stability metrics
+- Video overlay visualizations
+- MLflow experiment logging
+- Installable package for cross-project use
 
-# For videos
-python demo.py path/to/your/video.mp4
-```
+### 3. **OAK-D Camera Tracking** ([`oakd-camera-tracking/`](oakd-camera-tracking))
+- Real-time detection and tracking on OAK-D hardware
+- Pipeline for live camera and recorded video processing
+- Integration with custom-trained models (.blob format)
 
-Results will be saved in the `output/` directory.
+**Key Features:**
+- DepthAI integration for OAK-D cameras
+- Detection pipeline with configurable models
+- Support for camera and video replay modes
 
-### Detecting Boats in Images
+## Technology Stack
 
-```python
-from detect_boat import detect_boats
-
-# Detect boats and save annotated image
-detections = detect_boats('boat_image.jpg', 'output.jpg', confidence_threshold=0.5)
-
-# Print results
-for detection in detections:
-    print(f"Boat found at {detection['bbox']} with confidence {detection['confidence']:.2f}")
-```
-
-### Tracking Boats in Videos
-
-```python
-from track_boat import track_boats_in_video
-
-# Track boats and save output video
-stats = track_boats_in_video('boat_video.mp4', 'tracked_output.mp4', confidence_threshold=0.5)
-
-# Print statistics
-print(f"Processed {stats['total_frames']} frames")
-print(f"Found {stats['unique_boat_ids']} unique boats")
-```
+- **Computer Vision**: YOLOv8, OpenCV, Ultralytics
+- **Edge AI**: OAK-D cameras, DepthAI, OpenVINO model format
+- **ML Workflow**: MLflow for experiment tracking and model registry
+- **Development**: Python 3.13+, Ruff (linting/formatting), pytest
+- **Packaging**: Modern `pyproject.toml` configuration
 
 ## Project Structure
 
 ```
 where-the-hull-are-you/
-├── detect_boat.py      # Boat detection in images
-├── track_boat.py       # Boat tracking in videos
-├── demo.py            # Demo script with examples
-├── requirements.txt   # Python dependencies
-└── README.md         # This file
+├── model-training/              # Custom model training and evaluation
+│   ├── src/                     # Training, evaluation, data utilities
+│   ├── notebooks/               # Experimentation notebooks
+│   ├── config/                  # Training/eval configuration
+│   └── models/                  # Trained model weights
+├── shared-tracking-metrics/     # Reusable metrics library
+│   ├── src/tracking_metrics/    # Collectors, calculators, loggers
+│   └── tests/                   # Unit tests
+├── oakd-camera-tracking/        # OAK-D deployment pipeline
+│   ├── src/                     # Detection pipeline and config
+│   └── models/                  # Converted .blob models
+└── pyproject.toml               # Project dependencies and tooling
 ```
 
-## How It Works
+## Development Status
 
-1. **YOLOv8 Model**: Uses the YOLOv8n (nano) model - the smallest and fastest variant
-2. **COCO Dataset**: Model is pre-trained on COCO dataset which includes 'boat' as class 8
-3. **Tracking**: Uses built-in tracking algorithm to maintain boat IDs across frames
-4. **Confidence Threshold**: Filters detections based on confidence score (default: 0.5)
+### Completed
+- ✅ Model training pipeline with custom datasets
+- ✅ Dual evaluation strategy (labeled + unlabeled)
+- ✅ Shared metrics library for tracking quality
+- ✅ OAK-D camera integration and detection pipeline
+- ✅ MLflow experiment tracking
+- ✅ Modern Python tooling (pyproject.toml, Ruff)
 
-## Parameters
+### In Progress
+- 🔄 Model export to OAK-D .blob format
+- 🔄 Real-time tracking performance optimization
+- 🔄 Comprehensive test coverage
 
-### detect_boats()
-- `image_path`: Path to input image
-- `output_path`: Path to save annotated image (optional)
-- `confidence_threshold`: Minimum confidence score (0-1, default: 0.5)
+### Future Roadmap
+- 📋 ROS2 integration for robotics workflows
+- 📋 Multi-sensor fusion (camera + IMU + depth)
+- 📋 Containerization and deployment strategies
+- 📋 Web-based visualization dashboard
 
-### track_boats_in_video()
-- `video_path`: Path to input video
-- `output_path`: Path to save tracked video (optional)
-- `confidence_threshold`: Minimum confidence score (0-1, default: 0.5)
-- `show_video`: Display video during processing (default: False)
+## Getting Started
 
-## Requirements
+Each component can be installed independently:
 
-- Python 3.8+
-- OpenCV
-- Ultralytics YOLOv8
-- NumPy
+```bash
+# Install shared metrics library
+cd shared-tracking-metrics
+pip install -e .
 
-See `requirements.txt` for specific versions.
+# Install model training tools
+cd ../model-training
+pip install -e ".[dev]"
 
-## Tips for Beginners
+# Install OAK-D tracking pipeline
+cd ../oakd-camera-tracking
+pip install -e .
+```
 
-1. **Start Simple**: Run the demo script first to understand the basics
-2. **Adjust Confidence**: Lower the threshold (e.g., 0.3) to detect more boats, raise it (e.g., 0.7) for more confident detections
-3. **Model Size**: YOLOv8n is fast but less accurate. Try `yolov8s.pt`, `yolov8m.pt`, or `yolov8l.pt` for better accuracy
-4. **Video Quality**: Better quality videos produce better tracking results
-5. **Learn More**: Check out the [Ultralytics documentation](https://docs.ultralytics.com/) for advanced features
-
-## Next Steps
-
-Once you're comfortable with the basics, you can:
-- Fine-tune the model on your own boat dataset
-- Experiment with different YOLO model sizes
-- Add custom post-processing logic
-- Integrate with other systems (e.g., save to database, send alerts)
-- Try other object classes (ships, yachts, kayaks)
-
-## License
-
-See LICENSE file for details.
+**Note**: This project is under active development. Full deployment instructions will be provided as components stabilize.
 
 ## Contributing
 
-Contributions welcome! This is a learning project - feel free to submit improvements.
+Contributions welcome! This is a learning project focused on practical robotics and ML engineering skills.
+
+## License
+
+MIT License - See LICENSE file for details.
+
+---
+
+*A hands-on exploration of edge AI, computer vision, and robotics engineering.*

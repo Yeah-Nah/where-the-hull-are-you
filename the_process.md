@@ -4,6 +4,30 @@ A development journey blog documenting the creation of a boat tracking system.
 
 ---
 
+# Phase 1: Setting Up Model Training And Performance Tracking Pipeline
+
+## Entry 5: Tracking Metrics & Inference Pipeline Progress
+*Date: December 12, 2025*
+
+### Calculating tracking metrics on video files
+
+- **Collectors, calculators**: Built out a reusable tracking metrics library
+  - Added track history collection to support metrics like MOTA/IDF1 and stability
+  - Implemented initial metrics computation from tracking outputs
+- **Inference Tooling**: Reusable inference to to apply YOLO to any frame
+  - Created a `ModelInference` class for applying tracking to single videos
+  - Added a video reader utility and streamlined config files across projects
+- **Evaluators**: Classes for evaluating labelled and unlabelled video data
+- **Codebase hygiene and consistency**
+  - Applied Ruff linting/formatting across modules for consistent style
+  - Consolidated configs to simplify experimentation and deployment
+
+Tracking metrics from an unlabelled test video containing an 18ft skiff:
+
+<img src="other/images_md/Screenshot 2025-12-12 221810.png" alt="Screenshot" width="600">
+
+---
+
 # Phase 0: Set Up Local Dev Env
 
 ## Entry 4: YOLOv8 Integration & Real-Time Detection
