@@ -79,16 +79,17 @@ class UnlabeledEvaluator:
     def evaluate_single_video(
         self,
         video_path: Path,
+        batch_size: int = 16,  # Adjust based on GPU memory
     ) -> dict[str, float]:
         """Evaluate model on single video.
-
+        
         Parameters
         ----------
         video_path : Path
             Path to video file
-        tracker_config : str
-            Tracker configuration (not used in ModelInference currently)
-
+        batch_size : int
+            Number of frames to process at once
+            
         Returns
         -------
         Dict[str, float]
@@ -98,23 +99,37 @@ class UnlabeledEvaluator:
         self.collector.reset()
 
         cap = self._initiate_cap(video_path)
-        # video_props = self._get_video_properties(cap)
-
-        # Read video and run inference on each frame
+        
+        frame_batch = []
+        frame_ids = []
+        
         for frame_id, frame in self._read_video(cap):
-            # Use the inference instance to predict
-            detections = self.inference.predict_frame(frame)
+            frame_batch.append(frame)
+            frame_ids.append(frame_id)
+            
+            # Process batch when full
+            if len(frame_batch) == batch_size:
+                batch_detections = self.inference.predict_batch_frames(frame_batch)
+                
+                for fid, detections in zip(frame_ids, batch_detections):
+                    for det in detections:
+                        self.collector.add_detection_with_track(det, fid)
+                    self.collector.frame_count += 1
+                
+                if frame_id % 100 == 0:
+                    logger.debug(f"Processed frame {frame_id}")
+                
+                frame_batch = []
+                frame_ids = []
+        
+        # Process remaining frames
+        if frame_batch:
+            batch_detections = self.inference.predict_batch_frames(frame_batch)
+            for fid, detections in zip(frame_ids, batch_detections):
+                for det in detections:
+                    self.collector.add_detection_with_track(det, fid)
+                self.collector.frame_count += 1
 
-            # Process all detections
-            for det in detections:
-                self.collector.add_detection_with_track(det, frame_id)
-
-            self.collector.frame_count += 1
-
-            if frame_id % 100 == 0:
-                logger.debug(f"Processed frame {frame_id}")
-
-        # Compute and return metrics
         logger.info("Computing metrics...")
         metrics = self.calculator.compute_all_metrics()
         logger.success("Results:")
@@ -123,7 +138,7 @@ class UnlabeledEvaluator:
 
         return metrics
 
-    def evaluate_batch(
+    def evaluate_batch_video(
         self, folder_path: Path, tracker_config: str = "botsort.yaml"
     ) -> dict[str, float]:
         """Evaluate model on unlabeled videos.

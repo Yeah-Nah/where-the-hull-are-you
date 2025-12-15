@@ -68,3 +68,38 @@ class ModelInference:
                 )
 
         return detections
+
+    def predict_batch_frames(
+        self,
+        frames: list[np.ndarray],
+    ) -> list[list[dict[str, Any]]]:
+        """Run YOLO on multiple frames at once.
+        
+        Parameters
+        ----------
+        frames : List[np.ndarray]
+            List of frames to process
+            
+        Returns
+        -------
+        List[List[Dict[str, Any]]]
+            Detections for each frame
+        """
+        results = self.model.track(frames, **self.model_kwargs)
+        
+        all_detections = []
+        for result in results:
+            detections = []
+            if result.boxes is not None:
+                for box in result.boxes:
+                    detections.append(
+                        {
+                            "track_id": int(box.id[0]) if box.id is not None else -1,
+                            "bbox": box.xyxy[0].tolist(),
+                            "confidence": float(box.conf[0]),
+                            "class_id": int(box.cls[0]),
+                        }
+                    )
+            all_detections.append(detections)
+        
+        return all_detections
