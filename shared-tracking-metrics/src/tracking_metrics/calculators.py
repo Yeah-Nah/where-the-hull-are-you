@@ -30,16 +30,12 @@ class MetricsCalculator:
             return {
                 "confidence_mean": 0.0,
                 "confidence_std": 0.0,
-                "confidence_min": 0.0,
-                "confidence_max": 0.0,
             }
 
         confidences = np.array(self.collector.confidences)
         return {
             "confidence_mean": float(np.mean(confidences)),
             "confidence_std": float(np.std(confidences)),
-            "confidence_min": float(np.min(confidences)),
-            "confidence_max": float(np.max(confidences)),
         }
 
     def compute_track_metrics(self) -> dict[str, float]:
@@ -68,7 +64,7 @@ class MetricsCalculator:
             "min_track_length": int(np.min(track_lengths)),
         }
 
-    def compute_bbox_area(self) -> dict[str, float]:
+    def compute_bbox_area_metrics(self) -> dict[str, float]:
         """Calculate the bounding box area statistics.
 
         Returns
@@ -76,7 +72,7 @@ class MetricsCalculator:
         Dict[str, float]
             Bounding box area metrics (mean, std, min, max)
         """
-        if not self.collector.bbox_areas:
+        if len(self.collector.bbox_areas) == 0:
             return {
                 "bbox_area_mean": 0.0,
                 "bbox_area_std": 0.0,
@@ -84,23 +80,9 @@ class MetricsCalculator:
                 "bbox_area_max": 0.0,
             }
 
-        # Calculate areas from bboxes [x1, y1, x2, y2]
-        areas = []
-        for bbox in self.collector.bbox_areas:
-            if isinstance(bbox, list) and len(bbox) == 4:
-                width = bbox[2] - bbox[0]
-                height = bbox[3] - bbox[1]
-                areas.append(width * height)
-
-        if not areas:
-            return {
-                "bbox_area_mean": 0.0,
-                "bbox_area_std": 0.0,
-                "bbox_area_min": 0.0,
-                "bbox_area_max": 0.0,
-            }
-
-        areas = np.array(areas)
+        # bbox_areas already contains calculated areas (floats)
+        areas = np.array(self.collector.bbox_areas)
+        
         return {
             "bbox_area_mean": float(np.mean(areas)),
             "bbox_area_std": float(np.std(areas)),
@@ -172,12 +154,67 @@ class MetricsCalculator:
         if not self.collector.track_history:
             return 0.0
 
+        # TODO: Repeated code with track_lengths. Refactor to call each function after creating track_lengths once.
         track_lengths = [
             len(frames) for frames in self.collector.track_history.values()
         ]
         short_tracks = sum(1 for length in track_lengths if length < threshold)
 
         return short_tracks / len(track_lengths)
+
+    def compute_track_coverage_ratio(self, total_frames: int) -> dict[str, float]:
+        """Compute track length as percentage of total video length.
+
+        Parameters
+        ----------
+        total_frames : int
+            Total frames in the current video being analyzed
+
+        Returns
+        -------
+        Dict[str, float]
+            Track coverage metrics for this video
+        """
+        if not self.collector.track_history or total_frames == 0:
+            return {
+                "avg_track_coverage": 0.0,
+                "max_track_coverage": 0.0,
+                "median_track_coverage": 0.0,
+            }
+
+        track_lengths = [len(frames) for frames in self.collector.track_history.values()]
+        coverage_ratios = [length / total_frames for length in track_lengths]
+
+        return {
+            "avg_track_coverage": float(np.mean(coverage_ratios)),
+            "max_track_coverage": float(np.max(coverage_ratios)),
+            "median_track_coverage": float(np.median(coverage_ratios)),
+        }
+
+    def compute_detection_density(self, total_frames: int) -> dict[str, float]:
+        """Calculate detections per frame to understand detection frequency.
+
+        Parameters
+        ----------
+        total_frames : int
+            Total frames in the current video being analyzed
+
+        Returns
+        -------
+        Dict[str, float]
+            Detection density metrics
+        """
+        if total_frames == 0:
+            return {
+                "total_detections": 0,
+                "detections_per_frame": 0.0,
+            }
+
+        total_detections = len(self.collector.confidences)
+        return {
+            "total_detections": total_detections,
+            "detections_per_frame": float(total_detections / total_frames),
+        }
 
     def compute_mota(self, ground_truth: list[Track] | None = None) -> float:
         """Compute Multiple Object Tracking Accuracy (MOTA).
@@ -210,7 +247,7 @@ class MetricsCalculator:
         pass
 
     def compute_all_metrics(
-        self, ground_truth: list[Track] | None = None
+        self, ground_truth: list[Track] | None = None, total_frames: int | None = None
     ) -> dict[str, float]:
         """Compute all available metrics.
 
@@ -218,6 +255,8 @@ class MetricsCalculator:
         ----------
         ground_truth : Optional[List[Track]]
             Ground truth tracks (None for unlabeled data)
+        total_frames : Optional[int]
+            Total frames in video for normalized metrics (track coverage, detection density)
 
         Returns
         -------
@@ -227,9 +266,14 @@ class MetricsCalculator:
         metrics = {}
         metrics.update(self.compute_confidence_metrics())
         metrics.update(self.compute_track_metrics())
-        metrics.update(self.compute_bbox_area())
+        metrics.update(self.compute_bbox_area_metrics())
         metrics.update(self.compute_bbox_stability())
         metrics["short_track_ratio"] = self.compute_short_track_ratio()
+
+        # Add normalized metrics if total_frames provided
+        if total_frames is not None:
+            metrics.update(self.compute_track_coverage_ratio(total_frames))
+            metrics.update(self.compute_detection_density(total_frames))
 
         if ground_truth is not None:
             metrics["mota"] = self.compute_mota(ground_truth)
