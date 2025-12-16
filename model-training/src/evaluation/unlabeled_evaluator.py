@@ -81,7 +81,7 @@ class UnlabeledEvaluator:
             self,
             video_path: Path,
             frame_batch_size: int = 16,
-    ) -> None:
+    ) -> int:
         """Process single video and collect tracking data.
 
         Parameters
@@ -114,22 +114,20 @@ class UnlabeledEvaluator:
                 batch_detections = self.inference.predict_batch_frames(frame_batch)
                 
                 for fid, detections in zip(frame_ids, batch_detections):
-                    for det in detections:
-                        self.collector.add_detection_with_track(det, fid)
+                    self.collector.add_detections_batch(detections, fid)
                     self.collector.frame_count += 1
                 
                 frame_batch = []
                 frame_ids = []
             
-            if frame_id % 200 == 0:
+            if frame_id % 500 == 0:
                 logger.debug(f"Processed frame {frame_id}")
 
         # Process remaining frames
         if frame_batch:
             batch_detections = self.inference.predict_batch_frames(frame_batch)
             for fid, detections in zip(frame_ids, batch_detections):
-                for det in detections:
-                    self.collector.add_detection_with_track(det, fid)
+                self.collector.add_detections_batch(detections, fid)
                 self.collector.frame_count += 1
 
         cap.release()
@@ -158,15 +156,14 @@ class UnlabeledEvaluator:
         """
         self.collector.reset()
         
+        # Convert to Path if string
         video_path = Path(video_path)
         
         frame_count = self._process_single_video(video_path, batch_size)
 
         logger.info("Computing metrics...")
         metrics = self.calculator.compute_all_metrics(total_frames=frame_count)
-        logger.success("Results:")
-        for metric_name, value in metrics.items():
-            logger.success(f"  {metric_name}: {value:.4f}")
+        logger.success("Metrics Calculated")
 
         return {
             "video_name": video_path.name,
@@ -261,7 +258,7 @@ class UnlabeledEvaluator:
 
         return video_files
 
-    def evaluate_batch_video(
+    def evaluate_unlabeled_videos(
         self, folder_path: Path, batch_size: int = 16
     ) -> dict[str, float]:
         """Evaluate model on multiple unlabeled videos with weighted aggregation.
@@ -279,7 +276,7 @@ class UnlabeledEvaluator:
             Aggregated metrics across all videos
         """
         logger.info(f"Evaluating videos in: {folder_path}")
-
+        folder_path = Path(folder_path)
         video_files = self._get_video_files_in_folder(folder_path)
 
         # Process each video and collect metrics
@@ -303,12 +300,6 @@ class UnlabeledEvaluator:
         final_metrics["per_video_details"] = per_video_metrics
 
         # Log results
-        logger.success("Weighted Aggregated Results:")
-        for metric_name, value in weighted_metrics.items():
-            if metric_name not in ["per_video_details"]:
-                if isinstance(value, (int, float)):
-                    logger.success(f"  {metric_name}: {value:.4f}")
-                else:
-                    logger.success(f"  {metric_name}: {value}")
+        logger.success("Calculated aggregated metrics")
 
         return final_metrics
