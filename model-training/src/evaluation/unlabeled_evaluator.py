@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import cv2
-import numpy as np
 from loguru import logger
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.inference import ModelInference
@@ -78,9 +77,9 @@ class UnlabeledEvaluator:
             cap.release()
 
     def _process_single_video(
-            self,
-            video_path: Path,
-            frame_batch_size: int = 16,
+        self,
+        video_path: Path,
+        frame_batch_size: int = 16,
     ) -> int:
         """Process single video and collect tracking data.
 
@@ -108,25 +107,25 @@ class UnlabeledEvaluator:
         for frame_id, frame in self._read_video(cap):
             frame_batch.append(frame)
             frame_ids.append(frame_id)
-            
+
             # Process batch when full
             if len(frame_batch) == frame_batch_size:
                 batch_detections = self.inference.predict_batch_frames(frame_batch)
-                
-                for fid, detections in zip(frame_ids, batch_detections):
+
+                for fid, detections in zip(frame_ids, batch_detections, strict=True):
                     self.collector.add_detections_batch(detections, fid)
                     self.collector.frame_count += 1
-                
+
                 frame_batch = []
                 frame_ids = []
-            
+
             if frame_id % 500 == 0:
                 logger.debug(f"Processed frame {frame_id}")
 
         # Process remaining frames
         if frame_batch:
             batch_detections = self.inference.predict_batch_frames(frame_batch)
-            for fid, detections in zip(frame_ids, batch_detections):
+            for fid, detections in zip(frame_ids, batch_detections, strict=True):
                 self.collector.add_detections_batch(detections, fid)
                 self.collector.frame_count += 1
 
@@ -141,24 +140,24 @@ class UnlabeledEvaluator:
         batch_size: int = 16,  # Adjust based on GPU memory
     ) -> dict[str, float]:
         """Evaluate model on single video.
-        
+
         Parameters
         ----------
         video_path : Path
             Path to video file
         batch_size : int
             Number of frames to process at once
-            
+
         Returns
         -------
         Dict[str, float]
             Computed metrics
         """
         self.collector.reset()
-        
+
         # Convert to Path if string
         video_path = Path(video_path)
-        
+
         frame_count = self._process_single_video(video_path, batch_size)
 
         logger.info("Computing metrics...")
@@ -216,7 +215,9 @@ class UnlabeledEvaluator:
             if all(v == 0 for v in values):
                 weighted[f"weighted_{metric}"] = 0.0
             else:
-                weighted_value = sum(v * w for v, w in zip(values, weights)) / total_frames
+                weighted_value = (
+                    sum(v * w for v, w in zip(values, weights, strict=True)) / total_frames
+                )
                 weighted[f"weighted_{metric}"] = weighted_value
 
         # Totals and counts
