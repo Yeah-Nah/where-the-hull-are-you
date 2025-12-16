@@ -154,7 +154,7 @@ class MetricsCalculator:
         if not self.collector.track_history:
             return 0.0
 
-        # TODO: Repeated code with track_lengths. Refactor to call each function after creating track_lengths once.
+        # TODO: Repeated code with track_lengths. Refactor to call each function after creating track
         track_lengths = [
             len(frames) for frames in self.collector.track_history.values()
         ]

@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import cv2
+import numpy as np
 from loguru import logger
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.inference import ModelInference
@@ -157,11 +158,7 @@ class UnlabeledEvaluator:
         """
         self.collector.reset()
         
-        # Get video properties for normalized metrics
-        # cap = self._initiate_cap(video_path)
-        # props = self._get_video_properties(cap)
-        # cap.release()
-        # frame_count = props['frame_count']
+        video_path = Path(video_path)
         
         frame_count = self._process_single_video(video_path, batch_size)
 
@@ -178,44 +175,6 @@ class UnlabeledEvaluator:
             "metrics": metrics,
         }
 
-    # def _process_video_for_metrics(
-    #     self, video_path: Path, batch_size: int = 16
-    # ) -> dict:
-    #     """Process single video and return complete metrics with metadata.
-
-    #     Parameters
-    #     ----------
-    #     video_path : Path
-    #         Path to video file
-    #     batch_size : int
-    #         Number of frames to process at once
-
-    #     Returns
-    #     -------
-    #     Dict
-    #         Video metrics and metadata
-    #     """
-    #     self.collector.reset()
-
-    #     # Get video properties
-    #     cap = self._initiate_cap(video_path)
-    #     props = self._get_video_properties(cap)
-    #     cap.release()
-    #     frame_count = props["frame_count"]
-
-    #     # Process video
-    #     self._process_single_video(video_path, batch_size)
-
-    #     # Compute metrics
-    #     metrics = self.calculator.compute_all_metrics(total_frames=frame_count)
-
-    #     return {
-    #         "video_name": video_path.name,
-    #         "video_path": str(video_path),
-    #         "frame_count": frame_count,
-    #         "metrics": metrics,
-    #     }
-
     def _compute_weighted_aggregates(
         self, video_metrics: list[dict]
     ) -> dict[str, float]:
@@ -224,7 +183,7 @@ class UnlabeledEvaluator:
         Parameters
         ----------
         video_metrics : List[Dict]
-            List of dicts from _process_video_for_metrics()
+            List of dicts from evaluate_single_video()
 
         Returns
         -------
@@ -238,14 +197,15 @@ class UnlabeledEvaluator:
         weights = [vm["frame_count"] for vm in video_metrics]
         total_frames = sum(weights)
 
+        # TODO: Need to use a different calculation for the std metrics
         # Metrics to weight by frame count
         metrics_to_weight = [
             "confidence_mean",
-            "confidence_std",
+            # "confidence_std",
             "bbox_area_mean",
-            "bbox_area_std",
+            # "bbox_area_std",
             "bbox_jitter_mean",
-            "bbox_jitter_std",
+            # "bbox_jitter_std",
             "avg_track_coverage",
             "detections_per_frame",
             "short_track_ratio",
@@ -261,17 +221,6 @@ class UnlabeledEvaluator:
             else:
                 weighted_value = sum(v * w for v, w in zip(values, weights)) / total_frames
                 weighted[f"weighted_{metric}"] = weighted_value
-        # TODO: turn this into dict or something so you can add more metrics as needed without repeated code
-        # Global min/max (not weighted)
-        if any(vm["metrics"].get("confidence_mean", 0) > 0 for vm in video_metrics):
-            all_conf_values = [vm["metrics"].get("confidence_mean", 0) for vm in video_metrics]
-            weighted["global_confidence_min"] = min(all_conf_values)
-            weighted["global_confidence_max"] = max(all_conf_values)
-
-        if any(vm["metrics"].get("bbox_area_mean", 0) > 0 for vm in video_metrics):
-            all_bbox_values = [vm["metrics"].get("bbox_area_mean", 0) for vm in video_metrics]
-            weighted["global_bbox_area_min"] = min(all_bbox_values)
-            weighted["global_bbox_area_max"] = max(all_bbox_values)
 
         # Totals and counts
         weighted["total_videos"] = len(video_metrics)
@@ -285,57 +234,32 @@ class UnlabeledEvaluator:
 
         return weighted
 
-    # TODO: Honestly probably too many metrics, determine if to delete this one
-    def _compute_cross_video_statistics(
-        self, video_metrics: list[dict]
-    ) -> dict[str, float]:
-        """Compute distribution statistics across videos (unweighted).
+    def _get_video_files_in_folder(self, folder_path: Path) -> list[Path]:
+        """Get list of video files in a folder.
 
         Parameters
         ----------
-        video_metrics : List[Dict]
-            List of dicts from _process_video_for_metrics()
+        folder_path : Path
+            Path to folder
 
         Returns
         -------
-        Dict[str, float]
-            Cross-video statistics
+        List[Path]
+            List of video file paths
         """
-        import numpy as np
+        # Get all video files
+        video_extensions = [".mp4", ".avi", ".mov", ".mkv"]
+        video_files = [
+            f for f in folder_path.iterdir() if f.suffix.lower() in video_extensions
+        ]
 
-        if not video_metrics:
+        if not video_files:
+            logger.warning(f"No video files found in {folder_path}")
             return {}
 
-        stats = {}
+        logger.info(f"Found {len(video_files)} videos")
 
-        # Track coverage variability
-        track_coverage_values = [
-            vm["metrics"].get("avg_track_coverage", 0) for vm in video_metrics
-        ]
-        if track_coverage_values:
-            stats["track_coverage_std"] = float(np.std(track_coverage_values))
-
-        # Confidence mean range
-        confidence_values = [
-            vm["metrics"].get("confidence_mean", 0) for vm in video_metrics
-        ]
-        if confidence_values:
-            stats["confidence_mean_range"] = [
-                float(min(confidence_values)),
-                float(max(confidence_values)),
-            ]
-
-        # Detections per frame range
-        dpf_values = [
-            vm["metrics"].get("detections_per_frame", 0) for vm in video_metrics
-        ]
-        if dpf_values:
-            stats["detections_per_frame_range"] = [
-                float(min(dpf_values)),
-                float(max(dpf_values)),
-            ]
-
-        return stats
+        return video_files
 
     def evaluate_batch_video(
         self, folder_path: Path, batch_size: int = 16
@@ -356,17 +280,7 @@ class UnlabeledEvaluator:
         """
         logger.info(f"Evaluating videos in: {folder_path}")
 
-        # Get all video files
-        video_extensions = [".mp4", ".avi", ".mov", ".mkv"]
-        video_files = [
-            f for f in folder_path.iterdir() if f.suffix.lower() in video_extensions
-        ]
-
-        if not video_files:
-            logger.warning(f"No video files found in {folder_path}")
-            return {}
-
-        logger.info(f"Found {len(video_files)} videos")
+        video_files = self._get_video_files_in_folder(folder_path)
 
         # Process each video and collect metrics
         per_video_metrics = []
@@ -382,12 +296,10 @@ class UnlabeledEvaluator:
         # Compute aggregated metrics
         logger.info("Computing aggregated metrics...")
         weighted_metrics = self._compute_weighted_aggregates(per_video_metrics)
-        cross_stats = self._compute_cross_video_statistics(per_video_metrics)
 
         # Merge all metrics
         final_metrics = {}
         final_metrics.update(weighted_metrics)
-        final_metrics.update(cross_stats)
         final_metrics["per_video_details"] = per_video_metrics
 
         # Log results
