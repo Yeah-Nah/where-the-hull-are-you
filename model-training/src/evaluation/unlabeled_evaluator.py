@@ -113,7 +113,7 @@ class UnlabeledEvaluator:
                 batch_detections = self.inference.predict_batch_frames(frame_batch)
 
                 for fid, detections in zip(frame_ids, batch_detections, strict=True):
-                    self.collector.add_detections_batch(detections, fid)
+                    self.collector.add_batch_detection_with_track(detections, fid)
                     self.collector.frame_count += 1
 
                 frame_batch = []
@@ -126,7 +126,7 @@ class UnlabeledEvaluator:
         if frame_batch:
             batch_detections = self.inference.predict_batch_frames(frame_batch)
             for fid, detections in zip(frame_ids, batch_detections, strict=True):
-                self.collector.add_detections_batch(detections, fid)
+                self.collector.add_batch_detection_with_track(detections, fid)
                 self.collector.frame_count += 1
 
         cap.release()
