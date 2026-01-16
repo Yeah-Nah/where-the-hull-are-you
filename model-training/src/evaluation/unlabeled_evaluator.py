@@ -304,3 +304,18 @@ class UnlabeledEvaluator:
         logger.success("Calculated aggregated metrics")
 
         return final_metrics
+
+    def search(self, search_space, video_paths):
+        """Hyperparameter search with logging to MLFlow.
+        
+        Parameters
+        ----------
+        search_space : config
+            Config containing hyperparameter search space.
+        video_paths : path or str
+            Path to single video file, or folder path containing multiple video files.
+        
+        Returns
+        -------
+        TBD
+        """

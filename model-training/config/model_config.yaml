@@ -3,4 +3,4 @@ model_config:
   classes: [8] # Class IDs to detect (e.g., 0 for person, 8 for boat)
   persist: True # Persist tracks across frames
   verbose: False # Disable verbose output
-model: "yolov8n.pt"
+  model: "yolov8n.pt"

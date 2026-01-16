@@ -1,13 +1,13 @@
 # TBD
 
-model_hyperparam_config:
+search_space:
+  # Yolo model inference parameters
   conf: [0.3, 0.5, 0.7] # Detection confidence threshold
   classes: [8] # Class IDs to detect (e.g., 0 for person, 8 for boat)
   persist: True # Persist tracks across frames
   verbose: False # Disable verbose output
-model: "yolov8n.pt"
 
-botsort_hyperparam_config:
+  # Bot-SORT tracker parameters
   tracker_type: botsort # (str) Tracker backend: botsort|bytetrack; choose botsort to enable BoT-SORT features
   track_high_thresh: [0.1, 0.25] # (float) First-stage match threshold; raise for cleaner tracks, lower to keep more
   track_low_thresh: [0.1, 0.25] # (float) Second-stage threshold for low-score matches; balances recovery vs drift
