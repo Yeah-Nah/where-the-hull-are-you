@@ -67,6 +67,13 @@ Foundational for everything else.
 - Visualize tracking quality without ground truth (confidence heatmaps, track length distributions)
 - Integrate with MLflow to compare different tracker configs (BOTSORT params)
 
+### 1.1 Set Up CUDA
+Increase training and evaluation speed.
+
+**Why this matters:**
+- Currently 1:1 ratio of video to processing length
+- Need to speed it up for evaluation and training
+
 ### 2. Camera Calibration
 **Do this second** - validates the hardware is working correctly.
 

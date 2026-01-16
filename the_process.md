@@ -6,6 +6,28 @@ A development journey blog documenting the creation of a boat tracking system.
 
 # Phase 1: Setting Up Model Training And Performance Tracking Pipeline
 
+## Entry 6: Batch Video Tracking Metrics
+*Date: December 16, 2025*
+
+Building on the single-video tracking metrics from Entry 5, implemented batch processing capabilities:
+
+- **Multi Video Evaluation**: Extended the tracking metrics pipeline to batch process videos
+  - Implemented shared metric calculation logic to avoid code duplication
+  - Added progress tracking and error handling for robust batch operations
+- **Consolidated Metrics Output**: Aggregated tracking metrics across multiple videos
+  - Standardized metric collection format for easy comparison between videos
+  - Generated summary statistics across entire video batches
+- **Performance Optimization**: Improved processing speed for large video datasets
+  - Created batch processing utilities for batching frames and detections to increase efficiency
+  - Leveraged parallel processing where applicable
+  - Optimized memory usage for handling multiple concurrent video streams
+
+Aggregated and weighted metrics across multiple videos:
+
+<img src="other/images_md/Screenshot 2025-12-16 164325.png" alt="Screenshot" width="600">
+
+---
+
 ## Entry 5: Tracking Metrics & Inference Pipeline Progress
 *Date: December 12, 2025*
 
