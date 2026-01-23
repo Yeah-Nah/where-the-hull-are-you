@@ -4,6 +4,8 @@ from pathlib import Path
 
 import cv2
 from loguru import logger
+from itertools import product
+import mlflow
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.inference import ModelInference
 
@@ -22,12 +24,27 @@ class UnlabeledEvaluator:
             Model configuration parameters
         """
         self.model_path = model_path
-        self.model_config = model_config
-        self.inference = ModelInference(
-            model_path=str(model_path), model_config=model_config
-        )
         self.collector = TrackingMetricsCollector()
         self.calculator = MetricsCalculator(self.collector)
+
+    def _create_inference(self, model_config) -> ModelInference:
+        """Create model infernce for given config.
+
+        Parameters
+        ----------
+        model_config : config
+            Model config
+
+        Returns
+        -------
+        ModelInference
+            Configured inference instance
+        """
+
+        return ModelInference(
+            model_path=str(self.model_path),
+            model_config=model_config
+        )
 
     def _initiate_cap(self, video_path: str):
         """Inititate the video capture cv2 object."""
@@ -79,6 +96,7 @@ class UnlabeledEvaluator:
     def _process_single_video(
         self,
         video_path: Path,
+        inference: ModelInference,
         frame_batch_size: int = 16,
     ) -> int:
         """Process single video and collect tracking data.
@@ -87,6 +105,8 @@ class UnlabeledEvaluator:
         ----------
         video_path : Path
             Path to video file
+        inference : ModelInference
+            Instance of inference class
         frame_batch_size : int
             Number of frames to process at once
 
@@ -110,7 +130,7 @@ class UnlabeledEvaluator:
 
             # Process batch when full
             if len(frame_batch) == frame_batch_size:
-                batch_detections = self.inference.predict_batch_frames(frame_batch)
+                batch_detections = inference.predict_batch_frames(frame_batch)
 
                 for fid, detections in zip(frame_ids, batch_detections, strict=True):
                     self.collector.add_batch_detection_with_track(detections, fid)
@@ -124,7 +144,7 @@ class UnlabeledEvaluator:
 
         # Process remaining frames
         if frame_batch:
-            batch_detections = self.inference.predict_batch_frames(frame_batch)
+            batch_detections = inference.predict_batch_frames(frame_batch)
             for fid, detections in zip(frame_ids, batch_detections, strict=True):
                 self.collector.add_batch_detection_with_track(detections, fid)
                 self.collector.frame_count += 1
@@ -137,6 +157,7 @@ class UnlabeledEvaluator:
     def evaluate_single_video(
         self,
         video_path: Path,
+        model_config: dict,
         batch_size: int = 16,  # Adjust based on GPU memory
     ) -> dict[str, float]:
         """Evaluate model on single video.
@@ -145,6 +166,8 @@ class UnlabeledEvaluator:
         ----------
         video_path : Path
             Path to video file
+        model_config : dict
+            Config for model
         batch_size : int
             Number of frames to process at once
 
@@ -155,10 +178,13 @@ class UnlabeledEvaluator:
         """
         self.collector.reset()
 
+        # Create inference class with given config
+        inference = self._create_inference(model_config)
+
         # Convert to Path if string
         video_path = Path(video_path)
 
-        frame_count = self._process_single_video(video_path, batch_size)
+        frame_count = self._process_single_video(video_path, inference, batch_size)
 
         logger.info("Computing metrics...")
         metrics = self.calculator.compute_all_metrics(total_frames=frame_count)
@@ -260,7 +286,7 @@ class UnlabeledEvaluator:
         return video_files
 
     def evaluate_unlabeled_videos(
-        self, folder_path: Path, batch_size: int = 16
+        self, folder_path: Path, model_config: dict, batch_size: int = 16
     ) -> dict[str, float]:
         """Evaluate model on multiple unlabeled videos with weighted aggregation.
 
@@ -268,6 +294,8 @@ class UnlabeledEvaluator:
         ----------
         folder_path : Path
             Path to folder containing video files
+        model_config : dict
+            Model config as a dictionary
         batch_size : int
             Number of frames to process at once
 
@@ -284,7 +312,7 @@ class UnlabeledEvaluator:
         per_video_metrics = []
         for video_path in video_files:
             logger.info(f"Processing {video_path.name}...")
-            video_metrics = self.evaluate_single_video(video_path, batch_size)
+            video_metrics = self.evaluate_single_video(video_path, model_config, batch_size)
             per_video_metrics.append(video_metrics)
             logger.info(
                 f"  {video_path.name}: {video_metrics['frame_count']} frames, "
@@ -304,18 +332,57 @@ class UnlabeledEvaluator:
         logger.success("Calculated aggregated metrics")
 
         return final_metrics
+    
+    def _create_experiment(self, hyperparams: dict, path: Path):
+        """Create an experiment with given hyperparameters.
 
-    def search(self, search_space, video_paths):
+        Parameters
+        ----------
+        hyperparams : dict
+            Dictionary containing hyperparameters for the experiment.
+        path : Path
+            Path to single video file, or folder path containing multiple video files.
+        """
+
+    def search(self, search_space_config, path):
         """Hyperparameter search with logging to MLFlow.
         
         Parameters
         ----------
         search_space : config
             Config containing hyperparameter search space.
-        video_paths : path or str
+        path : path or str
             Path to single video file, or folder path containing multiple video files.
         
         Returns
         -------
         TBD
         """
+
+        # Turning string into path object
+        item_path = Path(path)
+
+        hp_keys, hp_values = zip(*search_space_config.items(), strict=False)
+        for experiment_counter, hp_combo in enumerate(product(*hp_values)):
+            hyperparams = dict(zip(hp_keys, hp_combo, strict=False))
+
+            self.model_config.update(hyperparams)
+            mlflow.set_tracking_uri("file:../output/mlruns")
+            with mlflow.start_run(run_name=f"experiment_{experiment_counter}"):
+                mlflow.log_params(hyperparams)
+
+                if item_path.is_file():
+                    logger.info("Starting hyperparameter search on single video file.")
+                    metrics = self.evaluate_single_video(item_path, hyperparams)
+                    mlflow.log_metrics(metrics["metrics"])
+
+                elif item_path.is_dir():
+                    logger.info("Starting hyperparameter search on folder of video files.")
+                    metrics = self.evaluate_unlabeled_videos(item_path, hyperparams)
+                    mlflow.log_metrics(metrics)
+
+                else:
+                    raise ValueError(f"Provided path is neither a file nor a folder: {path}")
+                
+                
+                logger.success(f"Logged experiment {experiment_counter} results to MLFlow.")
