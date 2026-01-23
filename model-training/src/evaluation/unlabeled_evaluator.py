@@ -13,15 +13,13 @@ from tracking_metrics.inference import ModelInference
 class UnlabeledEvaluator:
     """Evaluate model performance on unlabeled data."""
 
-    def __init__(self, model_path: Path, model_config: dict):
+    def __init__(self, model_path: Path):
         """Initialize evaluator with model.
 
         Parameters
         ----------
         model_path : Path
             Path to model weights
-        model_config : Dict
-            Model configuration parameters
         """
         self.model_path = model_path
         self.collector = TrackingMetricsCollector()
@@ -188,6 +186,7 @@ class UnlabeledEvaluator:
 
         logger.info("Computing metrics...")
         metrics = self.calculator.compute_all_metrics(total_frames=frame_count)
+        metrics["frame_count"] = frame_count
         logger.success("Metrics Calculated")
 
         return {
@@ -325,24 +324,13 @@ class UnlabeledEvaluator:
 
         # Merge all metrics
         final_metrics = {}
-        final_metrics.update(weighted_metrics)
+        final_metrics["metrics"] = weighted_metrics
         final_metrics["per_video_details"] = per_video_metrics
 
         # Log results
         logger.success("Calculated aggregated metrics")
 
         return final_metrics
-    
-    def _create_experiment(self, hyperparams: dict, path: Path):
-        """Create an experiment with given hyperparameters.
-
-        Parameters
-        ----------
-        hyperparams : dict
-            Dictionary containing hyperparameters for the experiment.
-        path : Path
-            Path to single video file, or folder path containing multiple video files.
-        """
 
     def search(self, search_space_config, path):
         """Hyperparameter search with logging to MLFlow.
@@ -366,7 +354,6 @@ class UnlabeledEvaluator:
         for experiment_counter, hp_combo in enumerate(product(*hp_values)):
             hyperparams = dict(zip(hp_keys, hp_combo, strict=False))
 
-            self.model_config.update(hyperparams)
             mlflow.set_tracking_uri("file:../output/mlruns")
             with mlflow.start_run(run_name=f"experiment_{experiment_counter}"):
                 mlflow.log_params(hyperparams)
@@ -379,7 +366,7 @@ class UnlabeledEvaluator:
                 elif item_path.is_dir():
                     logger.info("Starting hyperparameter search on folder of video files.")
                     metrics = self.evaluate_unlabeled_videos(item_path, hyperparams)
-                    mlflow.log_metrics(metrics)
+                    mlflow.log_metrics(metrics['metrics'])
 
                 else:
                     raise ValueError(f"Provided path is neither a file nor a folder: {path}")
