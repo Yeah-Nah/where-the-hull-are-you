@@ -1,11 +1,13 @@
 """Generic YOLO inference - works on any frame."""
+
 # shared-tracking-metrics/src/tracking_metrics/inference.py
-from typing import Any
-import yaml
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+import yaml
 from ultralytics import YOLO
+
 
 class ModelInference:
     """Generic YOLO inference - works on any frame."""
@@ -34,41 +36,42 @@ class ModelInference:
 
     def create_kwargs(self) -> dict[str, Any]:
         """Create model keyword arguments from model_config and tracker_config.
-        
+
         Returns
         -------
         dict[str, Any]
             Keyword arguments for model.track()
         """
         kwargs = {}
-        
+
         # Add model config parameters (remove None values)
         if self.model_config:
             kwargs.update({k: v for k, v in self.model_config.items() if v is not None})
-        
+
         # Add tracker config if present
         if self.tracker_config:
             # Filter out None values
-            tracker_params = {k: v for k, v in self.tracker_config.items() if v is not None}
-            
+            tracker_params = {
+                k: v for k, v in self.tracker_config.items() if v is not None
+            }
+
             # Get tracker type (default to botsort)
             tracker_type = tracker_params.get("tracker_type", "botsort")
-            
+
             # Create temporary tracker config file
             temp_dir = Path("temp_tracker_configs")
             temp_dir.mkdir(exist_ok=True)
-            
+
             # Generate filename
             config_path = temp_dir / f"{tracker_type}_custom.yaml"
-            
+
             # Write tracker config to file
             with open(config_path, "w") as f:
                 yaml.dump(tracker_params, f)
-            
-            kwargs["tracker"] = str(config_path)
-        
-        return kwargs
 
+            kwargs["tracker"] = str(config_path)
+
+        return kwargs
 
     def predict_frame(
         self,
@@ -109,19 +112,19 @@ class ModelInference:
         frames: list[np.ndarray],
     ) -> list[list[dict[str, Any]]]:
         """Run YOLO on multiple frames at once.
-        
+
         Parameters
         ----------
         frames : List[np.ndarray]
             List of frames to process
-            
+
         Returns
         -------
         List[List[Dict[str, Any]]]
             Detections for each frame
         """
         results = self.model.track(frames, **self.model_kwargs)
-        
+
         all_detections = []
         for result in results:
             detections = []
@@ -136,5 +139,5 @@ class ModelInference:
                         }
                     )
             all_detections.append(detections)
-        
+
         return all_detections

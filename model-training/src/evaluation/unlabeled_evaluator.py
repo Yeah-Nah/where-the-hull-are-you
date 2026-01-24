@@ -271,16 +271,18 @@ class UnlabeledEvaluator:
         }
 
         # Add totals and counts
-        weighted.update({
-            "total_videos": len(video_metrics),
-            "total_frames": total_frames,
-            "total_unique_tracks": sum(
-                vm["metrics"].get("num_tracks", 0) for vm in video_metrics
-            ),
-            "total_detections": sum(
-                vm["metrics"].get("total_detections", 0) for vm in video_metrics
-            ),
-        })
+        weighted.update(
+            {
+                "total_videos": len(video_metrics),
+                "total_frames": total_frames,
+                "total_unique_tracks": sum(
+                    vm["metrics"].get("num_tracks", 0) for vm in video_metrics
+                ),
+                "total_detections": sum(
+                    vm["metrics"].get("total_detections", 0) for vm in video_metrics
+                ),
+            }
+        )
 
         return weighted
 
@@ -298,7 +300,8 @@ class UnlabeledEvaluator:
             List of video file paths
         """
         video_files = [
-            f for f in folder_path.iterdir()
+            f
+            for f in folder_path.iterdir()
             if f.suffix.lower() in self.VIDEO_EXTENSIONS
         ]
 
@@ -342,7 +345,9 @@ class UnlabeledEvaluator:
         per_video_metrics = []
         for video_path in video_files:
             logger.info(f"Processing {video_path.name}...")
-            video_metrics = self.evaluate_single_video(video_path, model_config, batch_size)
+            video_metrics = self.evaluate_single_video(
+                video_path, model_config, batch_size
+            )
             per_video_metrics.append(video_metrics)
             logger.info(
                 f"  {video_path.name}: {video_metrics['frame_count']} frames, "
@@ -378,28 +383,30 @@ class UnlabeledEvaluator:
 
     def _flatten_search_space(self, search_space_config: dict) -> dict[str, list]:
         """Flatten nested config structure into flat search space.
-        
+
         Parameters
         ----------
         search_space_config : dict
             Nested configuration with model_config and botsort_config
-            
+
         Returns
         -------
         dict[str, list]
             Flattened search space with composite keys
         """
         flattened_space = {}
-        
+
         for top_key, top_value in search_space_config.items():
             if isinstance(top_value, dict):
                 # Nested config - create composite keys
                 for param_key, param_value in top_value.items():
                     composite_key = f"{top_key}.{param_key}"
-                    flattened_space[composite_key] = self._parse_param_values(param_value)
+                    flattened_space[composite_key] = self._parse_param_values(
+                        param_value
+                    )
             else:
                 flattened_space[top_key] = self._parse_param_values(top_value)
-        
+
         return flattened_space
 
     def _reconstruct_nested_config(self, flat_params: dict) -> dict:
@@ -422,11 +429,13 @@ class UnlabeledEvaluator:
         }
 
         # Add non-prefixed params to model_config
-        model_config.update({
-            key: value
-            for key, value in flat_params.items()
-            if not key.startswith(("model_config.", "botsort_config."))
-        })
+        model_config.update(
+            {
+                key: value
+                for key, value in flat_params.items()
+                if not key.startswith(("model_config.", "botsort_config."))
+            }
+        )
 
         botsort_config = {
             key.replace("botsort_config.", ""): value
@@ -479,7 +488,9 @@ class UnlabeledEvaluator:
                 elif item_path.is_dir():
                     result = self.evaluate_unlabeled_videos(item_path, final_config)
                 else:
-                    raise ValueError(f"Invalid path (must be file or directory): {item_path}")
+                    raise ValueError(
+                        f"Invalid path (must be file or directory): {item_path}"
+                    )
 
                 # Log to MLflow
                 self._log_params_to_mlflow(final_config)

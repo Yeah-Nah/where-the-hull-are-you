@@ -78,13 +78,10 @@ class TrackingMetricsCollector:
             # self.all_track_ids.append(track_id)
 
     def add_batch_detection_with_track(
-        self, 
-        detections: list[dict], 
-        frame_id: int, 
-        frame_shape: tuple[int, int] = None
+        self, detections: list[dict], frame_id: int, frame_shape: tuple[int, int] = None
     ):
         """Add multiple detections at once (more efficient than one-by-one).
-        
+
         Parameters
         ----------
         detections : List[dict]
@@ -96,30 +93,30 @@ class TrackingMetricsCollector:
         """
         if not detections:
             return
-            
+
         # Extract all data at once (vectorizable)
         confidences = [d["confidence"] for d in detections]
         bboxes = [d["bbox"] for d in detections]
         track_ids = [d.get("track_id") for d in detections]
-        
+
         # Batch append confidences
         self.confidences.extend(confidences)
-        
+
         # Batch compute and append areas
         areas = [(bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) for bbox in bboxes]
         self.bbox_areas.extend(areas)
-        
+
         # Process tracks
         for i, track_id in enumerate(track_ids):
             if track_id is None:
                 continue
-                
+
             # Initialize track storage if needed (store unique track_id only once)
             if track_id not in self.track_history:
                 self.track_history[track_id] = []
                 self.track_bboxes[track_id] = {}
                 self.all_track_ids.append(track_id)  # Store only once per unique track
-            
+
             # Add frame data
             self.track_history[track_id].append(frame_id)
             self.track_bboxes[track_id][frame_id] = bboxes[i]
