@@ -6,6 +6,38 @@ A development journey blog documenting the creation of a boat tracking system.
 
 # Phase 1: Setting Up Model Training And Performance Tracking Pipeline
 
+## Entry 7: Hyperparameter Search & Code Quality
+*Date: January 24, 2026*
+
+### MLflow Experiment Tracking & Pythonic Refactoring
+
+Implemented comprehensive hyperparameter search infrastructure with experiment tracking alongside major code quality improvements:
+
+- **Hyperparameter Search Pipeline**:
+  - Built grid search functionality for BoTSORT tracker and model parameters
+  - Implemented nested config handling (`_flatten_search_space()`, `_reconstruct_nested_config()`) to support hierarchical parameter spaces
+  - Created `search()` method to orchestrate experiments across all parameter combinations
+  - Added configurable MLflow integration for tracking experiment results
+- **MLflow Experiment Logging**:
+  - Integrated MLflow tracking URI and experiment naming
+  - Automated parameter and metric logging for each experiment run
+  - Added error handling and failure logging for robust experiment tracking
+  - Organized experiments with sequential naming (exp_0001, exp_0002, etc.)
+- **Code Quality & Refactoring**:
+  - Fixed 2 critical bugs (undefined `model_config` variable, incorrect return type)
+  - Reorganized imports following PEP 8 standards
+  - Added class-level constants for magic values and weighted metrics
+  - Extracted helper methods to eliminate code duplication (`_process_batch()`, `_calculate_weighted_metric()`)
+  - Applied Pythonic patterns (dict comprehensions, enumerate, concise conditionals)
+  - Removed debug print statements and improved error handling
+
+Result: Hyperparameter optimization system with clean, maintainable code that tracks all experiments systematically.
+
+MLFlow logging weighted metrics for hyperparameter search on multiple videos:
+
+<img src="other/images_md/Screenshot 2026-01-24 193431.png" alt="Screenshot" width="600">
+---
+
 ## Entry 6: Batch Video Tracking Metrics
 *Date: December 16, 2025*
 

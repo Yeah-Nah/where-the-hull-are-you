@@ -56,7 +56,7 @@ class MetricsCalculator:
 
         # Convert to numpy array once instead of calling np functions multiple times
         track_lengths_arr = np.array(track_lengths)
-        
+
         return {
             "num_tracks": len(self.collector.track_history),
             "avg_track_length": float(track_lengths_arr.mean()),
@@ -82,7 +82,7 @@ class MetricsCalculator:
 
         # bbox_areas already contains calculated areas (floats)
         areas = np.array(self.collector.bbox_areas)
-        
+
         return {
             "bbox_area_mean": float(np.mean(areas)),
             "bbox_area_std": float(np.std(areas)),
@@ -112,15 +112,19 @@ class MetricsCalculator:
             # Frames are already in chronological order (Python 3.7+ dict order guarantee)
             # No need to sort if data is collected sequentially
             frame_ids = list(frame_bboxes.keys())
-            
+
             # Calculate frame-to-frame displacement
             for i in range(len(frame_ids) - 1):
                 bbox1 = frame_bboxes[frame_ids[i]]
                 bbox2 = frame_bboxes[frame_ids[i + 1]]
 
                 # Vectorized center calculation
-                center1 = np.array([(bbox1[0] + bbox1[2]) / 2, (bbox1[1] + bbox1[3]) / 2])
-                center2 = np.array([(bbox2[0] + bbox2[2]) / 2, (bbox2[1] + bbox2[3]) / 2])
+                center1 = np.array(
+                    [(bbox1[0] + bbox1[2]) / 2, (bbox1[1] + bbox1[3]) / 2]
+                )
+                center2 = np.array(
+                    [(bbox2[0] + bbox2[2]) / 2, (bbox2[1] + bbox2[3]) / 2]
+                )
 
                 displacement = np.linalg.norm(center2 - center1)
                 all_jitters.append(displacement)
@@ -139,10 +143,12 @@ class MetricsCalculator:
 
         # Clear bbox data after computation to free memory
         self.collector.track_bboxes.clear()
-        
+
         return result
 
-    def compute_short_track_ratio(self, track_lengths: list[int], threshold: int = 5) -> dict[str, float]:
+    def compute_short_track_ratio(
+        self, track_lengths: list[int], threshold: int = 5
+    ) -> dict[str, float]:
         """Calculate ratio of short tracks to total tracks.
 
         Parameters
@@ -164,7 +170,9 @@ class MetricsCalculator:
 
         return {"short_track_ratio": short_tracks / len(track_lengths)}
 
-    def compute_track_coverage_ratio(self, total_frames: int, track_lengths: list[int]) -> dict[str, float]:
+    def compute_track_coverage_ratio(
+        self, total_frames: int, track_lengths: list[int]
+    ) -> dict[str, float]:
         """Compute track length as percentage of total video length.
 
         Parameters
@@ -281,7 +289,9 @@ class MetricsCalculator:
 
         # Add normalized metrics if total_frames provided
         if total_frames is not None:
-            metrics.update(self.compute_track_coverage_ratio(total_frames, track_lengths))
+            metrics.update(
+                self.compute_track_coverage_ratio(total_frames, track_lengths)
+            )
             metrics.update(self.compute_detection_density(total_frames))
 
         if ground_truth is not None:

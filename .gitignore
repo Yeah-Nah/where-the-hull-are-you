@@ -216,3 +216,6 @@ mlruns/
 # Ignore DepthAI cached models and lock files
 oakd-camera-tracking/.depthai_cached_models/
 *.lock
+
+# Temporary tracker configuration files
+temp_tracker_configs/
