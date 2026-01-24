@@ -1,6 +1,7 @@
 """Generic YOLO inference - works on any frame."""
 
 # shared-tracking-metrics/src/tracking_metrics/inference.py
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -32,7 +33,16 @@ class ModelInference:
         self.model = YOLO(model_path)
         self.tracker_config = tracker_config
         self.model_config = model_config
+        self._temp_config_file = None  # Track temp file for cleanup
         self.model_kwargs = self.create_kwargs()
+
+    def __del__(self):
+        """Cleanup temporary config file on object destruction."""
+        if self._temp_config_file and Path(self._temp_config_file).exists():
+            try:
+                Path(self._temp_config_file).unlink()
+            except (OSError, FileNotFoundError, PermissionError):
+                pass  # Ignore cleanup errors for temp files
 
     def create_kwargs(self) -> dict[str, Any]:
         """Create model keyword arguments from model_config and tracker_config.
@@ -58,17 +68,19 @@ class ModelInference:
             # Get tracker type (default to botsort)
             tracker_type = tracker_params.get("tracker_type", "botsort")
 
-            # Create temporary tracker config file
-            temp_dir = Path("temp_tracker_configs")
-            temp_dir.mkdir(exist_ok=True)
+            # Create temporary tracker config file with unique name
+            # Using NamedTemporaryFile with delete=False for manual cleanup control
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=f"_{tracker_type}_custom.yaml",
+                prefix="tracker_config_",
+                delete=False,
+            ) as temp_file:
+                yaml.dump(tracker_params, temp_file)
+                config_path = temp_file.name
 
-            # Generate filename
-            config_path = temp_dir / f"{tracker_type}_custom.yaml"
-
-            # Write tracker config to file
-            with open(config_path, "w") as f:
-                yaml.dump(tracker_params, f)
-
+            # Track temp file for cleanup
+            self._temp_config_file = config_path
             kwargs["tracker"] = str(config_path)
 
         return kwargs

@@ -2,6 +2,8 @@
 
 search_space:
   # Yolo model inference parameters
+  # Note: The YOLO model path is set via MODEL_PATH in model_settings.py
+  # To use a different model, update the 'model' parameter in model_config.yaml
   model_config:
     conf: [0.4, 0.7] # Detection confidence threshold
     classes: [8] # Class IDs to detect (e.g., 0 for person, 8 for boat)

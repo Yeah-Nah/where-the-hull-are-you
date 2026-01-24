@@ -11,6 +11,7 @@ import numpy as np
 from loguru import logger
 
 # Local
+from config.model_settings import DEFAULT_MLFLOW_URI
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.inference import ModelInference
 
@@ -55,7 +56,19 @@ class UnlabeledEvaluator:
         -------
         ModelInference
             Configured inference instance
+
+        Raises
+        ------
+        ValueError
+            If config structure is invalid (missing 'model_config' key)
         """
+        # Validate config structure
+        if "model_config" not in config:
+            raise ValueError(
+                "Invalid config structure: expected nested dict with 'model_config' key. "
+                "Config should be: {'model_config': {...}, 'botsort_config': {...}}"
+            )
+
         model_config = config.get("model_config")
         botsort_config = config.get("botsort_config")
 
@@ -317,7 +330,7 @@ class UnlabeledEvaluator:
         folder_path: Path | str,
         model_config: dict,
         batch_size: int = DEFAULT_BATCH_SIZE,
-    ) -> dict[str, float]:
+    ) -> dict[str, dict[str, float] | list[dict]]:
         """Evaluate model on multiple unlabeled videos with weighted aggregation.
 
         Parameters
@@ -331,8 +344,8 @@ class UnlabeledEvaluator:
 
         Returns
         -------
-        dict[str, float]
-            Aggregated metrics across all videos
+        dict[str, dict[str, float] | list[dict]]
+            Dictionary with 'metrics' (aggregated metrics) and 'per_video_details' (list of per-video results)
         """
         folder_path = Path(folder_path)
         logger.info(f"Evaluating videos in: {folder_path}")
@@ -482,6 +495,13 @@ class UnlabeledEvaluator:
         """
         with mlflow.start_run(run_name=f"exp_{experiment_counter:04d}"):
             try:
+                # Log parameters first so they're available even if experiment fails
+                self._log_params_to_mlflow(final_config)
+
+                # Validate path exists before processing
+                if not item_path.exists():
+                    raise ValueError(f"Path does not exist: {item_path}")
+
                 # Select evaluation method based on path type
                 if item_path.is_file():
                     result = self.evaluate_single_video(item_path, final_config)
@@ -489,11 +509,10 @@ class UnlabeledEvaluator:
                     result = self.evaluate_unlabeled_videos(item_path, final_config)
                 else:
                     raise ValueError(
-                        f"Invalid path (must be file or directory): {item_path}"
+                        f"Invalid path type (must be file or directory): {item_path}"
                     )
 
-                # Log to MLflow
-                self._log_params_to_mlflow(final_config)
+                # Log metrics on success
                 mlflow.log_metrics(result["metrics"])
                 logger.success(f"Logged experiment {experiment_counter}")
 
@@ -505,7 +524,7 @@ class UnlabeledEvaluator:
         self,
         search_space_config: dict,
         path: str | Path,
-        mlflow_uri: str = "file:../output/mlruns",
+        mlflow_uri: str | None = None,
         experiment_name: str = "botsort_hyperparam_search",
     ) -> None:
         """Hyperparameter search with logging to MLflow.
@@ -516,17 +535,38 @@ class UnlabeledEvaluator:
             Configuration containing hyperparameter search space
         path : str | Path
             Path to single video file or folder
-        mlflow_uri : str
-            MLflow tracking URI
+        mlflow_uri : str, optional
+            MLflow tracking URI. If None, defaults to '<project_root>/output/mlruns'.
+            Can be a relative path (resolved from current working directory) or absolute path.
         experiment_name : str
             MLflow experiment name
+
+        Note
+        ----
+        If using a relative mlflow_uri, ensure you run this from the expected working
+        directory (typically the model-training directory).
         """
         item_path = Path(path)
+
+        # Set default MLflow URI if not provided
+        if mlflow_uri is None:
+            mlflow_uri = DEFAULT_MLFLOW_URI
 
         # Flatten search space
         flattened_space = self._flatten_search_space(search_space_config)
         hp_keys = list(flattened_space.keys())
         hp_values = list(flattened_space.values())
+
+        # Validate search space is not empty
+        if not flattened_space:
+            raise ValueError("Search space is empty. Please provide valid hyperparameters.")
+
+        # Check for empty parameter lists
+        empty_params = [k for k, v in flattened_space.items() if not v]
+        if empty_params:
+            raise ValueError(
+                f"The following parameters have empty value lists: {', '.join(empty_params)}"
+            )
 
         # Setup MLflow
         mlflow.set_tracking_uri(mlflow_uri)
