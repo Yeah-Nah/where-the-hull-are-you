@@ -11,6 +11,7 @@ import numpy as np
 from loguru import logger
 
 # Local
+from config.model_settings import DEFAULT_MLFLOW_URI
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.inference import ModelInference
 
@@ -168,6 +169,7 @@ class UnlabeledEvaluator:
         props = self._get_video_properties(cap)
         frame_batch = []
         frame_ids = []
+        frame_id = -1  # Initialize to handle empty videos
 
         for frame_id, frame in enumerate(self._read_video(cap)):
             frame_batch.append(frame)
@@ -186,7 +188,7 @@ class UnlabeledEvaluator:
         cv2.destroyAllWindows()
 
         # Warn if actual processed frames differs from metadata
-        actual_frame_count = frame_id + 1 if frame_id >= 0 else 0
+        actual_frame_count = frame_id + 1
         metadata_frame_count = props["frame_count"]
         if actual_frame_count != metadata_frame_count:
             logger.warning(
@@ -558,9 +560,7 @@ class UnlabeledEvaluator:
 
         # Set default MLflow URI if not provided
         if mlflow_uri is None:
-            # Use absolute path relative to the evaluator's location
-            base_dir = Path(__file__).parent.parent.parent
-            mlflow_uri = f"file:{base_dir / 'output' / 'mlruns'}"
+            mlflow_uri = DEFAULT_MLFLOW_URI
 
         # Flatten search space
         flattened_space = self._flatten_search_space(search_space_config)
