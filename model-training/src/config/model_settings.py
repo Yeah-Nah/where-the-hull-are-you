@@ -13,13 +13,13 @@ DEFAULT_MLFLOW_URI = f"file:{BASE_DIR / 'output' / 'mlruns'}"
 try:
     with open(MODEL_CONFIG_FILE) as f:
         model_config = yaml.safe_load(f)
-except FileNotFoundError:
+except FileNotFoundError as e:
     raise FileNotFoundError(
         f"Model configuration file not found: {MODEL_CONFIG_FILE}. "
         "Please ensure the file exists and the path is correct."
-    )
+    ) from e
 except yaml.YAMLError as e:
-    raise ValueError(f"Error parsing model configuration file: {e}")
+    raise ValueError(f"Error parsing model configuration file: {e}") from e
 
 MODEL_CONFIG = model_config.get("model_config", {})
 MODEL = MODEL_CONFIG.get("model", "yolov8n.pt")
@@ -29,96 +29,14 @@ MODEL_PATH = BASE_DIR / Path("models") / MODEL
 try:
     with open(HYPERPARAM_SEARCH_CONFIG_FILE) as f:
         hyperparam_search_config = yaml.safe_load(f)
-except FileNotFoundError:
+except FileNotFoundError as e:
     raise FileNotFoundError(
         f"Hyperparameter search configuration file not found: {HYPERPARAM_SEARCH_CONFIG_FILE}. "
         "Please ensure the file exists and the path is correct."
-    )
+    ) from e
 except yaml.YAMLError as e:
-    raise ValueError(f"Error parsing hyperparameter search configuration file: {e}")
+    raise ValueError(
+        f"Error parsing hyperparameter search configuration file: {e}"
+    ) from e
 
 HYPERPARAM_SEARCH_SPACE = hyperparam_search_config.get("search_space", {})
-
-# COCO class names for display
-COCO_CLASSES = {
-    0: "person",
-    1: "bicycle",
-    2: "car",
-    3: "motorcycle",
-    4: "airplane",
-    5: "bus",
-    6: "train",
-    7: "truck",
-    8: "boat",
-    9: "traffic light",
-    10: "fire hydrant",
-    11: "stop sign",
-    12: "parking meter",
-    13: "bench",
-    14: "bird",
-    15: "cat",
-    16: "dog",
-    17: "horse",
-    18: "sheep",
-    19: "cow",
-    20: "elephant",
-    21: "bear",
-    22: "zebra",
-    23: "giraffe",
-    24: "backpack",
-    25: "umbrella",
-    26: "handbag",
-    27: "tie",
-    28: "suitcase",
-    29: "frisbee",
-    30: "skis",
-    31: "snowboard",
-    32: "sports ball",
-    33: "kite",
-    34: "baseball bat",
-    35: "baseball glove",
-    36: "skateboard",
-    37: "surfboard",
-    38: "tennis racket",
-    39: "bottle",
-    40: "wine glass",
-    41: "cup",
-    42: "fork",
-    43: "knife",
-    44: "spoon",
-    45: "bowl",
-    46: "banana",
-    47: "apple",
-    48: "sandwich",
-    49: "orange",
-    50: "broccoli",
-    51: "carrot",
-    52: "hot dog",
-    53: "pizza",
-    54: "donut",
-    55: "cake",
-    56: "chair",
-    57: "couch",
-    58: "potted plant",
-    59: "bed",
-    60: "dining table",
-    61: "toilet",
-    62: "tv",
-    63: "laptop",
-    64: "mouse",
-    65: "remote",
-    66: "keyboard",
-    67: "cell phone",
-    68: "microwave",
-    69: "oven",
-    70: "toaster",
-    71: "sink",
-    72: "refrigerator",
-    73: "book",
-    74: "clock",
-    75: "vase",
-    76: "scissors",
-    77: "teddy bear",
-    78: "hair drier",
-    79: "toothbrush",
-}
