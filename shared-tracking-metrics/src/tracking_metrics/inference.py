@@ -41,8 +41,8 @@ class ModelInference:
         if self._temp_config_file and Path(self._temp_config_file).exists():
             try:
                 Path(self._temp_config_file).unlink()
-            except (OSError, FileNotFoundError, PermissionError):
-                pass  # Ignore cleanup errors for temp files
+            except (OSError, FileNotFoundError, PermissionError) as e:
+                raise e
 
     def create_kwargs(self) -> dict[str, Any]:
         """Create model keyword arguments from model_config and tracker_config.

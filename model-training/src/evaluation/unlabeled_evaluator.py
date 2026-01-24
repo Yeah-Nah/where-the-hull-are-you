@@ -571,7 +571,9 @@ class UnlabeledEvaluator:
 
         # Validate search space is not empty
         if not flattened_space:
-            raise ValueError("Search space is empty. Please provide valid hyperparameters.")
+            raise ValueError(
+                "Search space is empty. Please provide valid hyperparameters."
+            )
 
         # Check for empty parameter lists
         empty_params = [k for k, v in flattened_space.items() if not v]
