@@ -8,10 +8,10 @@ from pathlib import Path
 import cv2
 import mlflow
 import numpy as np
-from loguru import logger
 
 # Local
 from config.model_settings import DEFAULT_MLFLOW_URI
+from loguru import logger
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.inference import ModelInference
 
@@ -169,10 +169,12 @@ class UnlabeledEvaluator:
         props = self._get_video_properties(cap)
         frame_batch = []
         frame_ids = []
+        last_frame_id = -1
 
         for frame_id, frame in enumerate(self._read_video(cap)):
             frame_batch.append(frame)
             frame_ids.append(frame_id)
+            last_frame_id = frame_id
 
             if len(frame_batch) == frame_batch_size:
                 self._process_batch(inference, frame_batch, frame_ids)
@@ -186,7 +188,17 @@ class UnlabeledEvaluator:
         self._process_batch(inference, frame_batch, frame_ids)
         cv2.destroyAllWindows()
 
-        return props["frame_count"]
+        # Return actual processed count, warn if differs from metadata
+        actual_frame_count = last_frame_id + 1
+        metadata_frame_count = props["frame_count"]
+
+        if actual_frame_count != metadata_frame_count:
+            logger.warning(
+                f"Processed {actual_frame_count} frames but metadata indicates "
+                f"{metadata_frame_count} frames for {video_path}"
+            )
+
+        return actual_frame_count
 
     def evaluate_single_video(
         self,
