@@ -169,7 +169,6 @@ class UnlabeledEvaluator:
         props = self._get_video_properties(cap)
         frame_batch = []
         frame_ids = []
-        frame_id = -1  # Initialize to handle empty videos
 
         for frame_id, frame in enumerate(self._read_video(cap)):
             frame_batch.append(frame)
@@ -187,16 +186,7 @@ class UnlabeledEvaluator:
         self._process_batch(inference, frame_batch, frame_ids)
         cv2.destroyAllWindows()
 
-        # Warn if actual processed frames differs from metadata
-        actual_frame_count = frame_id + 1
-        metadata_frame_count = props["frame_count"]
-        if actual_frame_count != metadata_frame_count:
-            logger.warning(
-                f"Actual processed frames ({actual_frame_count}) differs from "
-                f"metadata frame count ({metadata_frame_count}) for {video_path}"
-            )
-
-        return actual_frame_count
+        return props["frame_count"]
 
     def evaluate_single_video(
         self,
