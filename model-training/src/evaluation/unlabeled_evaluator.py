@@ -8,6 +8,7 @@ from itertools import product
 import mlflow
 from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
 from tracking_metrics.inference import ModelInference
+import numpy as np
 
 
 class UnlabeledEvaluator:
@@ -25,7 +26,7 @@ class UnlabeledEvaluator:
         self.collector = TrackingMetricsCollector()
         self.calculator = MetricsCalculator(self.collector)
 
-    def _create_inference(self, model_config) -> ModelInference:
+    def _create_inference(self, config) -> ModelInference:
         """Create model infernce for given config.
 
         Parameters
@@ -39,9 +40,16 @@ class UnlabeledEvaluator:
             Configured inference instance
         """
 
+        if "botsort_config" in config:
+            botsort_config = config.get("botsort_config")
+            model_config = config.get("model_config")
+        else:
+            botsort_config = None
+
         return ModelInference(
             model_path=str(self.model_path),
-            model_config=model_config
+            model_config=model_config,
+            tracker_config=botsort_config,
         )
 
     def _initiate_cap(self, video_path: str):
@@ -332,44 +340,180 @@ class UnlabeledEvaluator:
 
         return final_metrics
 
-    def search(self, search_space_config, path):
-        """Hyperparameter search with logging to MLFlow.
+    def _parse_param_values(self, param_config) -> list:
+        """Parse parameter config into list of values.
         
         Parameters
         ----------
-        search_space : config
-            Config containing hyperparameter search space.
-        path : path or str
-            Path to single video file, or folder path containing multiple video files.
-        
+        param_config : any
+            Parameter configuration (list, dict, or single value)
+            
         Returns
         -------
-        TBD
+        list
+            List of parameter values
         """
+        if isinstance(param_config, list):
+            return param_config
+        elif isinstance(param_config, dict):
+            return [param_config]
+        else:
+            return [param_config]
 
-        # Turning string into path object
-        item_path = Path(path)
+    def _flatten_search_space(self, search_space_config: dict) -> dict[str, list]:
+        """Flatten nested config structure into flat search space.
+        
+        Parameters
+        ----------
+        search_space_config : dict
+            Nested configuration with model_config and botsort_config
+            
+        Returns
+        -------
+        dict[str, list]
+            Flattened search space with composite keys
+        """
+        flattened_space = {}
+        
+        for top_key, top_value in search_space_config.items():
+            if isinstance(top_value, dict):
+                # Nested config - create composite keys
+                for param_key, param_value in top_value.items():
+                    composite_key = f"{top_key}.{param_key}"
+                    flattened_space[composite_key] = self._parse_param_values(param_value)
+            else:
+                flattened_space[top_key] = self._parse_param_values(top_value)
+        
+        return flattened_space
 
-        hp_keys, hp_values = zip(*search_space_config.items(), strict=False)
-        for experiment_counter, hp_combo in enumerate(product(*hp_values)):
-            hyperparams = dict(zip(hp_keys, hp_combo, strict=False))
+    def _reconstruct_nested_config(self, flat_params: dict) -> dict:
+        """Reconstruct nested config structure from flattened parameters.
+        
+        Parameters
+        ----------
+        flat_params : dict
+            Flattened parameters with composite keys
+            
+        Returns
+        -------
+        dict
+            Nested configuration with model_config and botsort_config
+        """
+        model_config = {}
+        botsort_config = {}
+        
+        for key, value in flat_params.items():
+            if key.startswith("model_config."):
+                param_name = key.replace("model_config.", "")
+                model_config[param_name] = value
+            elif key.startswith("botsort_config."):
+                param_name = key.replace("botsort_config.", "")
+                botsort_config[param_name] = value
+            else:
+                model_config[key] = value
+        
+        # Create final config structure
+        final_config = {"model_config": model_config}
+        if botsort_config:
+            final_config["botsort_config"] = botsort_config
+        
+        return final_config
 
-            mlflow.set_tracking_uri("file:../output/mlruns")
-            with mlflow.start_run(run_name=f"experiment_{experiment_counter}"):
-                mlflow.log_params(hyperparams)
+    def _log_params_to_mlflow(self, params: dict) -> None:
+        """Log parameters to MLflow.
+        
+        Parameters
+        ----------
+        params : dict
+            Parameters to log
+        """
+        print(params['model_config'])
+        print(params["botsort_config"])
+        mlflow.log_params(params['model_config'])
+        if 'botsort_config' in params:
+            mlflow.log_params(params['botsort_config'])
 
+    def _run_single_experiment(
+        self, 
+        item_path: Path, 
+        flat_params: dict, 
+        final_config: dict,
+        experiment_counter: int
+    ) -> None:
+        """Run single hyperparameter experiment and log to MLflow.
+        
+        Parameters
+        ----------
+        item_path : Path
+            Path to video file or folder
+        flat_params : dict
+            Flattened parameters for MLflow logging
+        final_config : dict
+            Nested config for evaluation
+        experiment_counter : int
+            Experiment number
+        """
+        with mlflow.start_run(run_name=f"exp_{experiment_counter:04d}"):
+            
+            try:
                 if item_path.is_file():
-                    logger.info("Starting hyperparameter search on single video file.")
-                    metrics = self.evaluate_single_video(item_path, hyperparams)
-                    mlflow.log_metrics(metrics["metrics"])
-
+                    print(final_config)
+                    result = self.evaluate_single_video(item_path, final_config)
+                    print(final_config)
+                    self._log_params_to_mlflow(final_config)
+                    mlflow.log_metrics(result["metrics"])
+                    
                 elif item_path.is_dir():
-                    logger.info("Starting hyperparameter search on folder of video files.")
-                    metrics = self.evaluate_unlabeled_videos(item_path, hyperparams)
-                    mlflow.log_metrics(metrics['metrics'])
-
+                    result = self.evaluate_unlabeled_videos(item_path, final_config)
+                    self._log_params_to_mlflow(final_config)
+                    mlflow.log_metrics(result["metrics"])
                 else:
-                    raise ValueError(f"Provided path is neither a file nor a folder: {path}")
+                    raise ValueError(f"Invalid path: {item_path}")
                 
+                logger.success(f"Logged experiment {experiment_counter}")
                 
-                logger.success(f"Logged experiment {experiment_counter} results to MLFlow.")
+            except Exception as e:
+                logger.error(f"Experiment {experiment_counter} failed: {e}")
+                mlflow.log_param("status", "failed")
+                mlflow.log_param("error", str(e))
+
+    def search(self, search_space_config: dict, path: str | Path) -> None:
+        """Hyperparameter search with logging to MLflow.
+        
+        Parameters
+        ----------
+        search_space_config : dict
+            Config containing hyperparameter search space
+        path : str or Path
+            Path to single video file or folder
+        """
+        
+        # Flatten nested search space
+        flattened_space = self._flatten_search_space(search_space_config)
+        hp_keys = list(flattened_space.keys())
+        hp_values = list(flattened_space.values())
+        
+        # Setup MLflow
+        item_path = Path(path)
+        mlflow.set_tracking_uri("file:../output/mlruns")
+        mlflow.set_experiment("botsort_hyperparam_search")
+        
+        # Log search info
+        total_combinations = np.prod([len(v) for v in hp_values])
+        logger.info(f"Starting search with {total_combinations} parameter combinations")
+        
+        # Run experiments
+        for experiment_counter, hp_combo in enumerate(product(*hp_values)):
+            flat_params = dict(zip(hp_keys, hp_combo, strict=False))
+            final_config = self._reconstruct_nested_config(flat_params)
+            
+            logger.info(f"Experiment {experiment_counter + 1}/{total_combinations}")
+            
+            self._run_single_experiment(
+                item_path=item_path,
+                flat_params=flat_params,
+                final_config=final_config,
+                experiment_counter=experiment_counter
+            )
+        
+        logger.success(f"Completed {total_combinations} experiments")

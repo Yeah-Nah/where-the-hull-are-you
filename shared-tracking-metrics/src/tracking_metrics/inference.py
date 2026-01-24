@@ -1,6 +1,8 @@
 """Generic YOLO inference - works on any frame."""
 # shared-tracking-metrics/src/tracking_metrics/inference.py
 from typing import Any
+import yaml
+from pathlib import Path
 
 import numpy as np
 from ultralytics import YOLO
@@ -31,9 +33,42 @@ class ModelInference:
         self.model_kwargs = self.create_kwargs()
 
     def create_kwargs(self) -> dict[str, Any]:
-        """Create model keyword arguments from model_config."""
-        # Remove keys with None values
-        return {k: v for k, v in self.model_config.items() if v is not None}
+        """Create model keyword arguments from model_config and tracker_config.
+        
+        Returns
+        -------
+        dict[str, Any]
+            Keyword arguments for model.track()
+        """
+        kwargs = {}
+        
+        # Add model config parameters (remove None values)
+        if self.model_config:
+            kwargs.update({k: v for k, v in self.model_config.items() if v is not None})
+        
+        # Add tracker config if present
+        if self.tracker_config:
+            # Filter out None values
+            tracker_params = {k: v for k, v in self.tracker_config.items() if v is not None}
+            
+            # Get tracker type (default to botsort)
+            tracker_type = tracker_params.get("tracker_type", "botsort")
+            
+            # Create temporary tracker config file
+            temp_dir = Path("temp_tracker_configs")
+            temp_dir.mkdir(exist_ok=True)
+            
+            # Generate filename
+            config_path = temp_dir / f"{tracker_type}_custom.yaml"
+            
+            # Write tracker config to file
+            with open(config_path, "w") as f:
+                yaml.dump(tracker_params, f)
+            
+            kwargs["tracker"] = str(config_path)
+        
+        return kwargs
+
 
     def predict_frame(
         self,
