@@ -526,7 +526,7 @@ class UnlabeledEvaluator:
                     raise ValueError(
                         f"Invalid path type (must be file or directory): {item_path}"
                     )
-                
+
                 # Log metrics on success
                 mlflow.log_metrics(result["metrics"])
                 logger.success(f"Logged experiment {experiment_counter}")
