@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-BASE_DIR = Path(__file__).parent.parent.parent
+BASE_DIR = Path(__file__).parent.parent
 MODEL_CONFIG_FILE = BASE_DIR / "config" / "model_config.yaml"
 HYPERPARAM_SEARCH_CONFIG_FILE = BASE_DIR / "config" / "hyperparam_search_config.yaml"
 DEFAULT_MLFLOW_URI = f"file:{BASE_DIR / 'output' / 'mlruns'}"
