@@ -483,7 +483,7 @@ class UnlabeledEvaluator:
             Parameters to log (must contain 'model_config', optionally 'botsort_config')
         """
         # Logging the model path
-        mlflow.log_params("model_path", str(self.model_path))
+        mlflow.log_param("model_path", str(self.model_path))
 
         if "model_config" in params:
             mlflow.log_params(params["model_config"])
@@ -526,7 +526,7 @@ class UnlabeledEvaluator:
                     raise ValueError(
                         f"Invalid path type (must be file or directory): {item_path}"
                     )
-
+                
                 # Log metrics on success
                 mlflow.log_metrics(result["metrics"])
                 logger.success(f"Logged experiment {experiment_counter}")
