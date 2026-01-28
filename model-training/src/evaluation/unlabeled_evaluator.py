@@ -12,7 +12,7 @@ from loguru import logger
 
 # Local
 from settings import DEFAULT_MLFLOW_URI
-from tracking_metrics import MetricsCalculator, TrackingMetricsCollector, ModelInference
+from tracking_metrics import MetricsCalculator, ModelInference, TrackingMetricsCollector
 
 
 class UnlabeledEvaluator:

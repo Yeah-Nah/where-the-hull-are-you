@@ -2,9 +2,9 @@
 
 from .calculators import MetricsCalculator
 from .collectors import TrackingMetricsCollector
+from .inference import ModelInference
 from .loggers import MLflowMetricsLogger
 from .visualizers import MetricsVisualizer
-from .inference import ModelInference
 
 __all__ = [
     "TrackingMetricsCollector",
