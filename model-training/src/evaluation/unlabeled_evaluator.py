@@ -8,12 +8,11 @@ from pathlib import Path
 import cv2
 import mlflow
 import numpy as np
+from loguru import logger
 
 # Local
-from config.model_settings import DEFAULT_MLFLOW_URI
-from loguru import logger
-from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
-from tracking_metrics.inference import ModelInference
+from settings import DEFAULT_MLFLOW_URI
+from tracking_metrics import MetricsCalculator, TrackingMetricsCollector, ModelInference
 
 
 class UnlabeledEvaluator:
