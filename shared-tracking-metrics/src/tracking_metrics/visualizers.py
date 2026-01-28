@@ -33,7 +33,7 @@ class MetricsVisualizer:
         np.ndarray
             Frame with detections drawn
         """
-        pass
+        raise NotImplementedError()
 
     def draw_tracks(self, frame: np.ndarray, frame_id: int) -> np.ndarray:
         """Draw tracks on a frame.
@@ -50,7 +50,7 @@ class MetricsVisualizer:
         np.ndarray
             Frame with tracks drawn
         """
-        pass
+        raise NotImplementedError()
 
     def draw_metrics_overlay(
         self, frame: np.ndarray, metrics: dict[str, float]
@@ -69,10 +69,10 @@ class MetricsVisualizer:
         np.ndarray
             Frame with metrics overlay
         """
-        pass
+        raise NotImplementedError()
 
     def create_confidence_heatmap(
-        self, frame_shape: tuple, window_size: int = 100
+        self, frame_shape: tuple[int, int], window_size: int = 100
     ) -> np.ndarray:
         """Create confidence heatmap over time.
 
@@ -88,7 +88,7 @@ class MetricsVisualizer:
         np.ndarray
             Heatmap visualization
         """
-        pass
+        raise NotImplementedError()
 
     def plot_track_length_distribution(self) -> np.ndarray:
         """Plot histogram of track lengths.
@@ -98,4 +98,4 @@ class MetricsVisualizer:
         np.ndarray
             Track length distribution plot
         """
-        pass
+        raise NotImplementedError()

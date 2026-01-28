@@ -18,7 +18,7 @@ class ModelTrainer:
         self.config = config
         self.model = None
 
-    def load_base_model(self, model_name: str = "yolov8n.pt"):
+    def load_base_model(self, model_name: str = "yolov8n.pt") -> None:
         """Load base model for transfer learning.
 
         Parameters
@@ -59,7 +59,7 @@ class ModelTrainer:
         Path
             Path to best model weights
         """
-        pass
+        raise NotImplementedError()
 
     def validate(self, data_yaml: Path) -> dict[str, float]:
         """Validate trained model on validation set.
@@ -74,4 +74,4 @@ class ModelTrainer:
         Dict[str, float]
             Validation metrics
         """
-        pass
+        raise NotImplementedError()

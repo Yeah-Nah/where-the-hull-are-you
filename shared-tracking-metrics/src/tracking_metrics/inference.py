@@ -16,8 +16,8 @@ class ModelInference:
     def __init__(
         self,
         model_path: str,
-        tracker_config: str | None = None,
-        model_config: dict = None,
+        tracker_config: dict[str, Any] | None = None,
+        model_config: dict[str, Any] | None = None,
     ):
         """Initialize inference with model and default parameters.
 
@@ -25,18 +25,18 @@ class ModelInference:
         ----------
         model_path : str
             Path to YOLO model weights
-        tracker_config : str, optional
-            Tracker configuration file (e.g., 'botsort.yaml')
+        tracker_config : dict, optional
+            Tracker configuration dictionary
         model_config : Dict, optional
             Model configuration parameters
         """
         self.model = YOLO(model_path)
         self.tracker_config = tracker_config
         self.model_config = model_config
-        self._temp_config_file = None  # Track temp file for cleanup
+        self._temp_config_file: str | None = None  # Track temp file for cleanup
         self.model_kwargs = self.create_kwargs()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Cleanup temporary config file on object destruction."""
         if self._temp_config_file and Path(self._temp_config_file).exists():
             try:

@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 # Get project root (2 levels up from this file)
-BASE_DIR = Path(__file__).parent.parent.parent
+BASE_DIR = Path(__file__).parent.parent
 CONFIG_FILE = BASE_DIR / "config" / "config.yaml"
 
 

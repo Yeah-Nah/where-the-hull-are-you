@@ -1,6 +1,7 @@
 """Collect detections and tracks over time for metrics calculation."""
 
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -27,7 +28,7 @@ class Track:
 class TrackingMetricsCollector:
     """Collect detections and tracks over time for metrics calculation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the metrics collector."""
         self.detections: list[Detection] = []
         self.tracks: dict[int, Track] = {}
@@ -43,8 +44,11 @@ class TrackingMetricsCollector:
         self.all_track_ids: list[int] = []
 
     def add_detection_with_track(
-        self, detection: dict, frame_id: int, frame_shape: tuple[int, int] = None
-    ):
+        self,
+        detection: dict[str, Any],
+        frame_id: int,
+        frame_shape: tuple[int, int] | None = None,
+    ) -> None:
         """Add detection and update track for a single frame.
 
         Parameters
@@ -78,8 +82,11 @@ class TrackingMetricsCollector:
             # self.all_track_ids.append(track_id)
 
     def add_batch_detection_with_track(
-        self, detections: list[dict], frame_id: int, frame_shape: tuple[int, int] = None
-    ):
+        self,
+        detections: list[dict[str, Any]],
+        frame_id: int,
+        frame_shape: tuple[int, int] | None = None,
+    ) -> None:
         """Add multiple detections at once (more efficient than one-by-one).
 
         Parameters
@@ -121,7 +128,7 @@ class TrackingMetricsCollector:
             self.track_history[track_id].append(frame_id)
             self.track_bboxes[track_id][frame_id] = bboxes[i]
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset all collected data."""
         self.detections.clear()
         self.tracks.clear()

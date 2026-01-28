@@ -1,19 +1,20 @@
 """Evaluator for unlabeled data using confidence-based metrics."""
 
 # Standard library
+from collections.abc import Generator
 from itertools import product
 from pathlib import Path
+from typing import Any
 
 # Third-party
 import cv2
 import mlflow
 import numpy as np
+from loguru import logger
 
 # Local
-from config.model_settings import DEFAULT_MLFLOW_URI
-from loguru import logger
-from tracking_metrics import MetricsCalculator, TrackingMetricsCollector
-from tracking_metrics.inference import ModelInference
+from settings import DEFAULT_MLFLOW_URI
+from tracking_metrics import MetricsCalculator, ModelInference, TrackingMetricsCollector
 
 
 class UnlabeledEvaluator:
@@ -44,7 +45,7 @@ class UnlabeledEvaluator:
         self.collector = TrackingMetricsCollector()
         self.calculator = MetricsCalculator(self.collector)
 
-    def _create_inference(self, config: dict) -> ModelInference:
+    def _create_inference(self, config: dict[str, Any]) -> ModelInference:
         """Create model inference for given config.
 
         Parameters
@@ -69,7 +70,9 @@ class UnlabeledEvaluator:
                 "Config should be: {'model_config': {...}, 'botsort_config': {...}}"
             )
 
-        model_config = config.get("model_config")
+        model_config = (
+            config.get("model_config") if config.get("model_config") else None
+        )
         botsort_config = config.get("botsort_config")
 
         return ModelInference(
@@ -98,7 +101,7 @@ class UnlabeledEvaluator:
             "frame_count": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
         }
 
-    def _read_video(self, cap: cv2.VideoCapture):
+    def _read_video(self, cap: cv2.VideoCapture) -> Generator[np.ndarray]:
         """Read video frames.
 
         Yields
@@ -116,7 +119,7 @@ class UnlabeledEvaluator:
             cap.release()
 
     def _process_batch(
-        self, inference: ModelInference, frames: list, frame_ids: list
+        self, inference: ModelInference, frames: list[np.ndarray], frame_ids: list[int]
     ) -> None:
         """Process a batch of frames and collect detections.
 
@@ -203,9 +206,9 @@ class UnlabeledEvaluator:
     def evaluate_single_video(
         self,
         video_path: Path | str,
-        model_config: dict,
+        model_config: dict[str, Any],
         batch_size: int = DEFAULT_BATCH_SIZE,
-    ) -> dict[str, float]:
+    ) -> dict[str, Any]:
         """Evaluate model on single video.
 
         Parameters
@@ -219,8 +222,8 @@ class UnlabeledEvaluator:
 
         Returns
         -------
-        dict[str, float]
-            Computed metrics
+        dict[str, Any]
+            Dictionary containing video metadata and computed metrics
         """
         video_path = Path(video_path)
         inference = self._create_inference(model_config)
@@ -240,7 +243,7 @@ class UnlabeledEvaluator:
     def _calculate_weighted_metric(
         self,
         metric_name: str,
-        video_metrics: list[dict],
+        video_metrics: list[dict[str, Any]],
         weights: list[int],
         total_frames: int,
     ) -> float:
@@ -267,8 +270,8 @@ class UnlabeledEvaluator:
         return weighted_sum / total_frames if total_frames > 0 else 0.0
 
     def _compute_weighted_aggregates(
-        self, video_metrics: list[dict]
-    ) -> dict[str, float]:
+        self, video_metrics: list[dict[str, Any]]
+    ) -> dict[str, float | int]:
         """Compute frame-weighted averages across multiple videos.
 
         Parameters
@@ -340,9 +343,9 @@ class UnlabeledEvaluator:
     def evaluate_unlabeled_videos(
         self,
         folder_path: Path | str,
-        model_config: dict,
+        model_config: dict[str, Any],
         batch_size: int = DEFAULT_BATCH_SIZE,
-    ) -> dict[str, dict[str, float] | list[dict]]:
+    ) -> dict[str, Any]:
         """Evaluate model on multiple unlabeled videos with weighted aggregation.
 
         Parameters
@@ -356,7 +359,7 @@ class UnlabeledEvaluator:
 
         Returns
         -------
-        dict[str, dict[str, float] | list[dict]]
+        dict[str, Any]
             Dictionary with 'metrics' (aggregated metrics) and 'per_video_details' (list of per-video results)
         """
         folder_path = Path(folder_path)
@@ -374,9 +377,14 @@ class UnlabeledEvaluator:
                 video_path, model_config, batch_size
             )
             per_video_metrics.append(video_metrics)
+            metrics_dict = video_metrics.get("metrics", {})
+            if isinstance(metrics_dict, dict):
+                num_tracks = metrics_dict.get("num_tracks", 0)
+            else:
+                num_tracks = 0
             logger.info(
                 f"  {video_path.name}: {video_metrics['frame_count']} frames, "
-                f"{video_metrics['metrics'].get('num_tracks', 0)} tracks"
+                f"{num_tracks} tracks"
             )
 
         # Compute and return aggregated metrics
@@ -389,7 +397,7 @@ class UnlabeledEvaluator:
             "per_video_details": per_video_metrics,
         }
 
-    def _parse_param_values(self, param_config) -> list:
+    def _parse_param_values(self, param_config: Any) -> list[Any]:
         """Parse parameter config into list of values.
 
         Parameters
@@ -406,7 +414,9 @@ class UnlabeledEvaluator:
             return param_config
         return [param_config]
 
-    def _flatten_search_space(self, search_space_config: dict) -> dict[str, list]:
+    def _flatten_search_space(
+        self, search_space_config: dict[str, Any]
+    ) -> dict[str, list[Any]]:
         """Flatten nested config structure into flat search space.
 
         Parameters
@@ -434,7 +444,7 @@ class UnlabeledEvaluator:
 
         return flattened_space
 
-    def _reconstruct_nested_config(self, flat_params: dict) -> dict:
+    def _reconstruct_nested_config(self, flat_params: dict[str, Any]) -> dict[str, Any]:
         """Reconstruct nested config structure from flattened parameters.
 
         Parameters
@@ -474,7 +484,7 @@ class UnlabeledEvaluator:
 
         return final_config
 
-    def _log_params_to_mlflow(self, params: dict) -> None:
+    def _log_params_to_mlflow(self, params: dict[str, Any]) -> None:
         """Log parameters to MLflow.
 
         Parameters
@@ -494,7 +504,7 @@ class UnlabeledEvaluator:
     def _run_single_experiment(
         self,
         item_path: Path,
-        final_config: dict,
+        final_config: dict[str, Any],
         experiment_counter: int,
     ) -> None:
         """Run single hyperparameter experiment and log to MLflow.
@@ -537,7 +547,7 @@ class UnlabeledEvaluator:
 
     def search(
         self,
-        search_space_config: dict,
+        search_space_config: dict[str, Any],
         path: str | Path,
         mlflow_uri: str | None = None,
         experiment_name: str = "botsort_hyperparam_search",

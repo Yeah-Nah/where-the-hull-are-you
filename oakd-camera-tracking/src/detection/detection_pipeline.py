@@ -3,6 +3,7 @@
 
 import time
 from pathlib import Path
+from typing import Any
 
 import cv2
 import depthai as dai
@@ -15,7 +16,10 @@ class DetectionPipeline:
     """Runs required detection pipeline on given input feed. Either video replay or camera feed."""
 
     def __init__(
-        self, input_video: str = None, use_camera: bool = False, model_path: Path = None
+        self,
+        input_video: str | None = None,
+        use_camera: bool = False,
+        model_path: Path | None = None,
     ):
         """Initiate detection pipeline.
 
@@ -27,11 +31,11 @@ class DetectionPipeline:
         self.input_video = input_video
         self.use_camera = use_camera
         self.model_path = model_path
-        self.pipeline = None
-        self.video_queue = None
-        self.nn_queue = None
+        self.pipeline: dai.Pipeline | None = None
+        self.video_queue: Any | None = None
+        self.nn_queue: Any | None = None
 
-    def run_detection(self):
+    def run_detection(self) -> None:
         """Run the required detection pipeline."""
         # Get pipeline and queues from appropriate processor
         if self.use_camera:
@@ -100,7 +104,7 @@ class DetectionPipeline:
         finally:
             cv2.destroyAllWindows()
 
-    def process_detections(self, tensor: np.ndarray) -> list:
+    def process_detections(self, tensor: np.ndarray) -> list[dict[str, Any]]:
         """
         Process neural network output tensor and filter detections.
 
@@ -137,7 +141,7 @@ class DetectionPipeline:
     def draw_detections(
         self,
         frame: np.ndarray,
-        detections: list,
+        detections: list[dict[str, Any]],
         frame_width: int,
         frame_height: int,
         fps: float,
