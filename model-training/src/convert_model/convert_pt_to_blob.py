@@ -43,7 +43,7 @@ def convert_pt_to_blob(
     model = YOLO(str(pt_path))
 
     # Step 1: Export to ONNX
-    # Note: img_size is in (W, H) format as specified by user requirements
+    # Note: img_size uses (W, H) format per repository owner specification (PR #13)
     print(f"[2/3] Exporting to ONNX format (img_size={img_size})...")
     onnx_path = output_path / f"{model_name}.onnx"
     model.export(format="onnx", imgsz=img_size, simplify=True, opset=12)
