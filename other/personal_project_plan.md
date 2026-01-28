@@ -3,7 +3,7 @@
 Based on your skill assessment and the job requirements, here are targeted projects to bridge your data science background to maritime robotics:
 
 ## **Project 1: OAK-D Maritime Object Detection & Tracking System**
-**Duration:** 2-3 months  
+**Duration:** 2-3 months
 **Primary Hardware:** OAK-D Camera
 
 ### **Goal:**
@@ -50,7 +50,7 @@ Develop a real-time maritime object detection and tracking system using OAK-D's 
 ---
 
 ## **Project 2: Multi-Sensor Maritime Navigation System**
-**Duration:** 3-4 months  
+**Duration:** 3-4 months
 **Hardware:** OAK-D + Additional Cameras + Simulated Radar
 
 ### **Goal:**
@@ -97,7 +97,7 @@ Build a comprehensive navigation system that fuses data from multiple cameras an
 ---
 
 ## **Project 3: ROS2 Maritime Perception Framework**
-**Duration:** 2-3 months  
+**Duration:** 2-3 months
 **Focus:** System Integration & Real-time Processing
 
 ### **Goal:**
@@ -144,7 +144,7 @@ Refactor the maritime perception system into a modular ROS2 framework with conta
 ---
 
 ## **Project 4: Maritime ML Pipeline with MLOps**
-**Duration:** 2-3 months  
+**Duration:** 2-3 months
 **Focus:** Production ML Systems & Model Management
 
 ### **Goal:**
