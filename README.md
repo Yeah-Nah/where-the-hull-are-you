@@ -2,7 +2,7 @@
 
 A real-time maritime object detection and tracking system built for embedded vision hardware. This project explores the intersection of computer vision, robotics, and edge AI by developing a complete pipeline from model training to deployment on OAK-D cameras.
 
-### **Check out my progress updates here:** ([`👉 Progress Updates 👈`](the_process.md))
+### **Check out my progress updates here:** ([`👉 Progress Updates 👈`](PROCESS_UPDATES.md))
 
 ## Project Vision
 
