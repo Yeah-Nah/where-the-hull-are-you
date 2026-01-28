@@ -19,10 +19,10 @@ from ultralytics import YOLO
 def convert_pt_to_blob(
     pt_model_path: str,
     output_dir: str = "src/models",
-    img_size: tuple | list = (512, 384),
+    img_size: tuple[int, int] | list[int] = (512, 384),
     shaves: int = 6,
     openvino_version: str = "2022.1",
-):
+) -> None:
     """
     Convert YOLOv8 .pt model to .blob format.
 
@@ -98,7 +98,7 @@ def convert_pt_to_blob(
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     """Run pipeline to convert .pt model to blob format."""
     parser = argparse.ArgumentParser(
         description="Convert YOLOv8 .pt model to .blob format for OAK-D cameras"

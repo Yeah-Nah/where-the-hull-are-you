@@ -19,11 +19,11 @@ class MLflowMetricsLogger:
         self.experiment_name = experiment_name
         self.run_name = run_name
 
-    def start_run(self):
+    def start_run(self) -> None:
         """Start a new MLflow run."""
         pass
 
-    def log_metrics(self, metrics: dict[str, float], step: int | None = None):
+    def log_metrics(self, metrics: dict[str, float], step: int | None = None) -> None:
         """Log metrics to MLflow.
 
         Parameters
@@ -35,7 +35,7 @@ class MLflowMetricsLogger:
         """
         pass
 
-    def log_params(self, params: dict[str, Any]):
+    def log_params(self, params: dict[str, Any]) -> None:
         """Log parameters to MLflow.
 
         Parameters
@@ -45,7 +45,7 @@ class MLflowMetricsLogger:
         """
         pass
 
-    def log_artifact(self, artifact_path: str):
+    def log_artifact(self, artifact_path: str) -> None:
         """Log artifact (video, plot, etc.) to MLflow.
 
         Parameters
@@ -55,6 +55,6 @@ class MLflowMetricsLogger:
         """
         pass
 
-    def end_run(self):
+    def end_run(self) -> None:
         """End the current MLflow run."""
         pass

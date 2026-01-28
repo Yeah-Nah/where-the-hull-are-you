@@ -240,7 +240,7 @@ class MetricsCalculator:
         float
             MOTA score (only if ground truth provided)
         """
-        pass
+        raise NotImplementedError()
 
     def compute_idf1(self, ground_truth: list[Track] | None = None) -> float:
         """Compute ID F1 score.
@@ -255,7 +255,7 @@ class MetricsCalculator:
         float
             IDF1 score (only if ground truth provided)
         """
-        pass
+        raise NotImplementedError()
 
     def compute_all_metrics(
         self, ground_truth: list[Track] | None = None, total_frames: int | None = None
@@ -284,14 +284,18 @@ class MetricsCalculator:
         metrics.update(self.compute_confidence_metrics())
         metrics.update(self.compute_bbox_area_metrics())
         metrics.update(self.compute_bbox_stability())
-        metrics.update(self.compute_track_metrics(track_lengths))
-        metrics.update(self.compute_short_track_ratio(track_lengths))
+        if track_lengths is not None:
+            metrics.update(self.compute_track_metrics(track_lengths))
+            metrics.update(self.compute_short_track_ratio(track_lengths))
 
-        # Add normalized metrics if total_frames provided
+            # Add normalized metrics if total_frames provided
+            if total_frames is not None:
+                metrics.update(
+                    self.compute_track_coverage_ratio(total_frames, track_lengths)
+                )
+
+        # Add detection density if total_frames provided
         if total_frames is not None:
-            metrics.update(
-                self.compute_track_coverage_ratio(total_frames, track_lengths)
-            )
             metrics.update(self.compute_detection_density(total_frames))
 
         if ground_truth is not None:

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-BASE_DIR = Path(__file__).parent.parent.parent
+BASE_DIR = Path(__file__).parent.parent
 MODEL_CONFIG_FILE = BASE_DIR / "config" / "model_config.yaml"
 
 # Model configuration settngs

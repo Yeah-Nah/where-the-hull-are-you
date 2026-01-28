@@ -3,7 +3,7 @@
 from tracking_metrics.collectors import TrackingMetricsCollector
 
 
-def test_tracking_metrics_collector_init():
+def test_tracking_metrics_collector_init() -> None:
     """Test collector initialization."""
     collector = TrackingMetricsCollector()
     assert collector.frame_count == 0
@@ -11,14 +11,14 @@ def test_tracking_metrics_collector_init():
     assert len(collector.tracks) == 0
 
 
-def test_add_frame_detections():
+def test_add_frame_detections() -> None:
     """Test adding frame detections."""
     # collector = TrackingMetricsCollector()
     # TODO: Implement test
     pass
 
 
-def test_reset():
+def test_reset() -> None:
     """Test resetting collector."""
     collector = TrackingMetricsCollector()
     collector.frame_count = 10

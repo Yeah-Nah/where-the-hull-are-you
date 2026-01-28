@@ -1,5 +1,7 @@
 """Processor for handling camera feed input and processing."""
 
+from typing import Any
+
 import depthai as dai
 from src.config.camera_settings import CAM_HEIGHT, CAM_WIDTH
 
@@ -7,11 +9,11 @@ from src.config.camera_settings import CAM_HEIGHT, CAM_WIDTH
 class CameraFeedProcessor:
     """Processor for handling camera feed input and processing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the camera feed processor."""
         self.pipeline = dai.Pipeline()
 
-    def camera_feed_connect(self):
+    def camera_feed_connect(self) -> tuple[Any, Any, Any]:
         """Connect to the camera feed.
 
         Returns

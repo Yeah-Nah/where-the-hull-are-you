@@ -1,6 +1,7 @@
 """Processor for handling video replay input and processing."""
 
 from pathlib import Path
+from typing import Any
 
 import cv2
 import depthai as dai
@@ -14,7 +15,7 @@ class VideoFeedProcessor:
         self.video_path = video_path
         self.pipeline = dai.Pipeline()
 
-    def get_video_resolution(self):
+    def get_video_resolution(self) -> tuple[int | None, int | None]:
         """Get video resolution (width, height)."""
         cap = cv2.VideoCapture(str(self.video_path))
         if not cap.isOpened():
@@ -26,7 +27,7 @@ class VideoFeedProcessor:
 
         return width, height
 
-    def video_feed_connect(self):
+    def video_feed_connect(self) -> tuple[Any, Any, Any]:
         """Connect to the video feed.
 
         Returns
