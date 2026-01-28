@@ -19,7 +19,7 @@ from ultralytics import YOLO
 def convert_pt_to_blob(
     pt_model_path: str,
     output_dir: str = "src/models",
-    img_size: tuple = (512, 384),
+    img_size: tuple | list = (512, 384),
     shaves: int = 6,
     openvino_version: str = "2022.1",
 ):
@@ -28,8 +28,8 @@ def convert_pt_to_blob(
 
     Args:
         pt_model_path: Path to the .pt model file
-        output_dir: Directory to save output files
-        img_size: Input image size (default: 640)
+        output_dir: Directory to save output files (default: src/models)
+        img_size: Input image size as (W, H) tuple (default: (512, 384))
         shaves: Number of SHAVE cores for MyriadX (default: 6)
         openvino_version: OpenVINO version to use (default: 2022.1)
     """
@@ -43,6 +43,7 @@ def convert_pt_to_blob(
     model = YOLO(str(pt_path))
 
     # Step 1: Export to ONNX
+    # Note: img_size uses (W, H) format per repository owner specification (PR #13)
     print(f"[2/3] Exporting to ONNX format (img_size={img_size})...")
     onnx_path = output_path / f"{model_name}.onnx"
     model.export(format="onnx", imgsz=img_size, simplify=True, opset=12)
@@ -98,7 +99,7 @@ def convert_pt_to_blob(
 
 
 def main():
-    """Run pipeline to convert .pt model to blobl format."""
+    """Run pipeline to convert .pt model to blob format."""
     parser = argparse.ArgumentParser(
         description="Convert YOLOv8 .pt model to .blob format for OAK-D cameras"
     )
@@ -107,17 +108,17 @@ def main():
         "-o",
         "--output-dir",
         type=str,
-        default="models",
-        help="Output directory (default: models)",
+        default="src/models",
+        help="Output directory (default: src/models)",
     )
     parser.add_argument(
         "-s",
         "--img-size",
         type=int,
-        nargs=2,  # Changed to accept 2 values
-        default=[384, 512],  # Changed default to [height, width]
-        metavar=("HEIGHT", "WIDTH"),
-        help="Input image size as HEIGHT WIDTH (default: 384 512)",
+        nargs=2,
+        default=[512, 384],
+        metavar=("WIDTH", "HEIGHT"),
+        help="Input image size as WIDTH HEIGHT (default: 512 384)",
     )
     parser.add_argument(
         "--shaves",
