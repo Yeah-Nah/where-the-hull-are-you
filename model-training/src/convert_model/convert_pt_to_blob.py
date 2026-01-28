@@ -19,7 +19,7 @@ from ultralytics import YOLO
 def convert_pt_to_blob(
     pt_model_path: str,
     output_dir: str = "src/models",
-    img_size: tuple = (512, 384),
+    img_size: tuple | list = (512, 384),
     shaves: int = 6,
     openvino_version: str = "2022.1",
 ):
@@ -43,6 +43,7 @@ def convert_pt_to_blob(
     model = YOLO(str(pt_path))
 
     # Step 1: Export to ONNX
+    # Note: img_size is in (W, H) format as specified by user requirements
     print(f"[2/3] Exporting to ONNX format (img_size={img_size})...")
     onnx_path = output_path / f"{model_name}.onnx"
     model.export(format="onnx", imgsz=img_size, simplify=True, opset=12)
@@ -98,7 +99,7 @@ def convert_pt_to_blob(
 
 
 def main():
-    """Run pipeline to convert .pt model to blobl format."""
+    """Run pipeline to convert .pt model to blob format."""
     parser = argparse.ArgumentParser(
         description="Convert YOLOv8 .pt model to .blob format for OAK-D cameras"
     )
