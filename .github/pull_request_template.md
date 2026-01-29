@@ -1,21 +1,21 @@
-## Summary
+## Summary:
 - Briefly describe the purpose of this PR and the problem it solves.
 
-## Changes
+## Changes:
 - High-level list of changes (files, modules, features)
 - Note any breaking changes or migrations
 
-## How to Test
+## How to Test:
 - Steps to validate locally
 - Relevant commands:
 	- `pip install -e ".[dev]"`
 	- `ruff check . && ruff format .`
 	- `pytest`
 
-## Screenshots / Logs (optional)
+## Screenshots / Logs (optional):
 - Add images or logs that help reviewers understand the change
 
-## Checklist
+## Checklist:
 - [ ] Code compiles and runs locally
 - [ ] Tests added/updated where appropriate
 - [ ] `ruff check .` passes (or auto-fixed)
@@ -23,5 +23,5 @@
 - [ ] Documentation updated (README/config/examples)
 - [ ] No secrets or credentials committed
 
-## Notes for Reviewers
+## Notes for Reviewers:
 - Call out tricky areas, trade-offs, or follow-ups

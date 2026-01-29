@@ -2,6 +2,7 @@
 
 # Standard library
 from collections.abc import Generator
+from datetime import UTC, datetime
 from itertools import product
 from pathlib import Path
 from typing import Any
@@ -492,8 +493,8 @@ class UnlabeledEvaluator:
         params : dict
             Parameters to log (must contain 'model_config', optionally 'botsort_config')
         """
-        # Logging the model path
-        mlflow.log_param("model_path", str(self.model_path))
+        # Log model name
+        mlflow.log_param("model_name", Path(self.model_path).name)
 
         if "model_config" in params:
             mlflow.log_params(params["model_config"])
@@ -518,7 +519,9 @@ class UnlabeledEvaluator:
         experiment_counter : int
             Experiment number
         """
-        with mlflow.start_run(run_name=f"exp_{experiment_counter:04d}"):
+        timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
+        run_name = f"exp_{experiment_counter:04d}_{timestamp}"
+        with mlflow.start_run(run_name=run_name):
             try:
                 # Log parameters first so they're available even if experiment fails
                 self._log_params_to_mlflow(final_config)

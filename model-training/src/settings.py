@@ -25,6 +25,23 @@ MODEL_CONFIG = model_config.get("model_config", {})
 MODEL = MODEL_CONFIG.get("model", "yolov8n.pt")
 MODEL_PATH = BASE_DIR / Path("models") / MODEL
 
+# Validate that model file exists
+if not MODEL_PATH.exists():
+    raise FileNotFoundError(
+        f"Model file not found: {MODEL_PATH}. "
+        f"Please ensure the model exists in the models directory. "
+        f"Current MODEL setting: {MODEL}"
+    )
+
+# Validate model file extension
+VALID_MODEL_EXTENSIONS = {".pt"}
+if MODEL_PATH.suffix not in VALID_MODEL_EXTENSIONS:
+    raise ValueError(
+        f"Invalid model file extension: {MODEL_PATH.suffix}. "
+        f"Expected one of {VALID_MODEL_EXTENSIONS}. "
+        f"Model file: {MODEL_PATH}"
+    )
+
 # Search space configuration settings
 try:
     with open(HYPERPARAM_SEARCH_CONFIG_FILE) as f:

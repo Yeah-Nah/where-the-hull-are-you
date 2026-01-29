@@ -1,6 +1,28 @@
 model_config:
-  conf: 0.5 # Detection confidence threshold
+  conf: 0.3 # Detection confidence threshold
   classes: [8] # Class IDs to detect (e.g., 0 for person, 8 for boat)
   persist: True # Persist tracks across frames
   verbose: False # Disable verbose output
-  model: "yolov8n.pt"
+  model: "yolo11n.pt"
+
+# Best settings for yolov8n + BoT-SORT tracker
+  # botsort_config:
+  #   # Bot-SORT tracker parameters
+  #   tracker_type: [botsort] # Use BoT-SORT for best tracking quality
+
+  #   # Critical tracking parameters (most impact on performance)
+  #   track_high_thresh: [0.4,] # First-stage match threshold (3 values)
+  #   track_low_thresh: [0.1] # Second-stage threshold (2 values)
+  #   new_track_thresh: [0.4] # New track threshold (2 values)
+  #   track_buffer: [30] # Lost track persistence (2 values)
+  #   match_thresh: [0.7] # Association threshold (2 values)
+
+  #   # Less critical - use recommended defaults
+  #   fuse_score: [True] # Always fuse scores for stability
+  #   gmc_method: [sparseOptFlow] # Best for maritime camera motion
+
+  #   # ReID disabled for initial search
+  #   proximity_thresh: [0.5] # Fixed - standard value
+  #   appearance_thresh: [0.25] # Fixed - standard value
+  #   with_reid: [False] # Disable ReID to reduce complexity
+  #   model: [auto] # Auto-detect
