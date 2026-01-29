@@ -6,6 +6,46 @@ A development journey blog documenting the creation of a boat tracking system.
 
 # Phase 1: Setting Up Model Training And Performance Tracking Pipeline
 
+## Entry 8: Code Quality, CI/CD & Configuration Improvements
+*Date: January 28-29, 2026*
+
+### Pre-commit Hooks, Type Safety & Project Restructuring
+
+Major codebase cleanup focused on code quality automation, type safety, and improved project structure:
+
+- **Pre-commit Hooks & GitHub Actions**:
+  - Configured comprehensive pre-commit hooks: Ruff linting/formatting, YAML validation, trailing whitespace removal, merge conflict detection
+  - Added Jupyter notebook linting with nbqa-ruff for maintaining notebook code quality
+  - Implemented per-package MyPy type checking (shared-tracking-metrics, model-training, oakd-camera-tracking)
+  - Created GitHub Actions workflow with separate linting and validation jobs running on PRs and main branch pushes
+- **Type Safety & Code Quality**:
+  - Added strict type hints across evaluation, tracking metrics, and model conversion modules
+  - Enhanced type annotations in `unlabeled_evaluator.py`, calculators, collectors, and inference classes
+  - Improved docstrings and function signatures for better code documentation
+  - Fixed MyPy to run separately per package to avoid namespace conflicts
+- **Project Structure Improvements**:
+  - Deleted 200+ lines of moot code: removed `labeled_evaluator.py`, `video_loader.py`, outdated READMEs, and legacy `setup.py` files
+  - Restructured config file locations for better organization across all packages
+  - Cleaned up unused imports and consolidated evaluation module exports
+  - Moved settings files to package roots for cleaner import paths
+- **Configuration Validation & MLflow**:
+  - Added import-time model path validation in `settings.py` with extension checking (`.pt`, `.yaml`, `.yml`)
+  - Changed MLflow logging from full path to model name (e.g., "yolo11n.pt") for portability
+  - Added UTC datetime suffix to experiment run names: `exp_0001_20260129143022`
+  - Prevents duplicate run names and provides better experiment organization
+
+Result: Automated code quality enforcement, comprehensive type checking, streamlined project structure, and fail-fast configuration validation.
+
+Basic github actions in action:
+
+<img src="other/images_md/Screenshot 2026-01-24 212430.png" alt="Screenshot" width="600">
+
+Mlflow experiments logged with unlabelled data performance metrics and accessed through the Mlflow UI:
+
+<img src="other/images_md/Screenshot 2026-01-25 121554.png" alt="Screenshot" width="600">
+
+---
+
 ## Entry 7: Hyperparameter Search & Code Quality
 *Date: January 24, 2026*
 
