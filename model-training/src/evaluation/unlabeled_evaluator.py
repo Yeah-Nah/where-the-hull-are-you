@@ -493,7 +493,7 @@ class UnlabeledEvaluator:
         params : dict
             Parameters to log (must contain 'model_config', optionally 'botsort_config')
         """
-        # Log model name and full path
+        # Log model name
         mlflow.log_param("model_name", Path(self.model_path).name)
 
         if "model_config" in params:

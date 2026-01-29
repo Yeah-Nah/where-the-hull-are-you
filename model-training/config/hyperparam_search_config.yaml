@@ -1,10 +1,9 @@
 # Hyperparameter search configuration for YOLOv8n tracking optimization
-# Target: ~60 experiments focusing on tracking performance
 
 search_space:
   # Yolo model inference parameters
   model_config:
-    conf: [0.3, 0.5] # Detection confidence threshold (3 values)
+    conf: [0.3] # Detection confidence threshold
     classes: [8] # Class IDs to detect (boat only)
     persist: [True] # Persist tracks across frames
     verbose: [False] # Disable verbose output
@@ -14,11 +13,11 @@ search_space:
     tracker_type: [botsort] # Use BoT-SORT for best tracking quality
 
     # Critical tracking parameters (most impact on performance)
-    track_high_thresh: [0.4, 0.6] # First-stage match threshold (3 values)
-    track_low_thresh: [0.1, 0.15] # Second-stage threshold (2 values)
-    new_track_thresh: [0.4, 0.5] # New track threshold (2 values)
-    track_buffer: [30] # Lost track persistence (2 values)
-    match_thresh: [0.7] # Association threshold (2 values)
+    track_high_thresh: [0.4] # First-stage match threshold
+    track_low_thresh: [0.1] # Second-stage threshold
+    new_track_thresh: [0.7] # New track threshold
+    track_buffer: [30] # Lost track persistence
+    match_thresh: [0.7] # Association threshold
 
     # Less critical - use recommended defaults
     fuse_score: [True] # Always fuse scores for stability

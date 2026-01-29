@@ -13,11 +13,11 @@ A development journey blog documenting the creation of a boat tracking system.
 
 Major codebase cleanup focused on code quality automation, type safety, and improved project structure:
 
-- **Pre-commit Hooks & GitHub Actions**:
+- **Pre-commit Hooks & Github Actions**:
   - Configured comprehensive pre-commit hooks: Ruff linting/formatting, YAML validation, trailing whitespace removal, merge conflict detection
   - Added Jupyter notebook linting with nbqa-ruff for maintaining notebook code quality
   - Implemented per-package MyPy type checking (shared-tracking-metrics, model-training, oakd-camera-tracking)
-  - Created GitHub Actions workflow with separate linting and validation jobs running on PRs and main branch pushes
+  - Created Github Actions workflow with separate linting and validation jobs running on PRs and main branch pushes
 - **Type Safety & Code Quality**:
   - Added strict type hints across evaluation, tracking metrics, and model conversion modules
   - Enhanced type annotations in `unlabeled_evaluator.py`, calculators, collectors, and inference classes
@@ -28,15 +28,15 @@ Major codebase cleanup focused on code quality automation, type safety, and impr
   - Restructured config file locations for better organization across all packages
   - Cleaned up unused imports and consolidated evaluation module exports
   - Moved settings files to package roots for cleaner import paths
-- **Configuration Validation & MLflow**:
-  - Added import-time model path validation in `settings.py` with extension checking (`.pt`, `.yaml`, `.yml`)
-  - Changed MLflow logging from full path to model name (e.g., "yolo11n.pt") for portability
+- **Configuration Validation & Mlflow**:
+  - Added import-time model path validation in `settings.py` with extension checking (`.pt`)
+  - Changed Mlflow logging from full path to model name (e.g., "yolo11n.pt") for portability
   - Added UTC datetime suffix to experiment run names: `exp_0001_20260129143022`
   - Prevents duplicate run names and provides better experiment organization
 
 Result: Automated code quality enforcement, comprehensive type checking, streamlined project structure, and fail-fast configuration validation.
 
-Basic github actions in action:
+Basic Github actions in action:
 
 <img src="other/images_md/Screenshot 2026-01-24 212430.png" alt="Screenshot" width="600">
 
@@ -49,7 +49,7 @@ Mlflow experiments logged with unlabelled data performance metrics and accessed 
 ## Entry 7: Hyperparameter Search & Code Quality
 *Date: January 24, 2026*
 
-### MLflow Experiment Tracking & Pythonic Refactoring
+### Mlflow Experiment Tracking & Pythonic Refactoring
 
 Implemented comprehensive hyperparameter search infrastructure with experiment tracking alongside major code quality improvements:
 
@@ -57,9 +57,9 @@ Implemented comprehensive hyperparameter search infrastructure with experiment t
   - Built grid search functionality for BoTSORT tracker and model parameters
   - Implemented nested config handling (`_flatten_search_space()`, `_reconstruct_nested_config()`) to support hierarchical parameter spaces
   - Created `search()` method to orchestrate experiments across all parameter combinations
-  - Added configurable MLflow integration for tracking experiment results
-- **MLflow Experiment Logging**:
-  - Integrated MLflow tracking URI and experiment naming
+  - Added configurable Mlflow integration for tracking experiment results
+- **Mlflow Experiment Logging**:
+  - Integrated Mlflow tracking URI and experiment naming
   - Automated parameter and metric logging for each experiment run
   - Added error handling and failure logging for robust experiment tracking
   - Organized experiments with sequential naming (exp_0001, exp_0002, etc.)
@@ -73,7 +73,7 @@ Implemented comprehensive hyperparameter search infrastructure with experiment t
 
 Result: Hyperparameter optimization system with clean, maintainable code that tracks all experiments systematically.
 
-MLFlow logging weighted metrics for hyperparameter search on multiple videos:
+Mlflow logging weighted metrics for hyperparameter search on multiple videos:
 
 <img src="other/images_md/Screenshot 2026-01-24 193431.png" alt="Screenshot" width="600">
 ---
@@ -209,5 +209,5 @@ Initial set up learning modern Python tooling and open source computer vision te
 
 - **Boat Detection**: Using YOLOv8 for real-time boat detection
 - **Tracking System**: Implementing BoT-SORT for multi-object tracking
-- **MLflow Integration**: Experiment tracking and model management
+- **Mlflow Integration**: Experiment tracking and model management
 - **Video Processing Pipeline**: Efficient batch processing of video footage

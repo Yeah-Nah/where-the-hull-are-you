@@ -16,6 +16,12 @@ repos:
       - id: check-yaml           # Validate YAML syntax
       - id: check-merge-conflict # Catch merge conflict markers
 
+    # Jupyter notebooks - Strip outputs
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+
   # Jupyter notebooks
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.9.1

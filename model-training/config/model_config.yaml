@@ -5,6 +5,7 @@ model_config:
   verbose: False # Disable verbose output
   model: "yolo11n.pt"
 
+# Best settings for yolov8n + BoT-SORT tracker
   # botsort_config:
   #   # Bot-SORT tracker parameters
   #   tracker_type: [botsort] # Use BoT-SORT for best tracking quality
