@@ -1,5 +1,5 @@
 # Video input directory containing video files to process
-input_video_directory: "path/to/video/folder"
+input_video_directory: "E:/20251026 18s Race 3"
 
 # Output directory for extracted frames
 output_frames_directory: "output/frames"

@@ -7,13 +7,13 @@ name = "boat-tracking-system"
 version = "0.1.0"
 description = "A system for detecting and tracking boats in video footage using YOLO"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 license = {text = "MIT"}
 authors = [
     {name = "Your Name", email = "your.email@example.com"}
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
@@ -28,7 +28,6 @@ dependencies = [
     "matplotlib",
     "mlflow>=2.10.0",
     "depthai>=3.2.1",
-    "tracking-metrics @ file:../shared-tracking-metrics",
 ]
 
 # Optional dependencies for different use cases
@@ -56,7 +55,25 @@ Issues = "https://github.com/Yeah-Nah/where-the-hull-are-you/issues"
 
 # Setuptools configuration
 [tool.setuptools.packages.find]
-where = ["oakd-camera-tracking/src"]
+where = [
+    "oakd-camera-tracking/src",
+    "model-training/src",
+    "data-preparation/src",
+    "shared-tracking-metrics/src",
+    "."
+]
+include = [
+    "detection*",
+    "processors*",
+    "models*",
+    "evaluation*",
+    "training*",
+    "preprocessing*",
+    "tracking_metrics*",
+    "utils*",
+    "convert_model*"
+]
+exclude = ["tests*", "docs*", "*.egg-info"]
 
 # Ruff linter configuration
 [tool.ruff]

@@ -4,44 +4,38 @@ from pathlib import Path
 
 import cv2
 from loguru import logger
-from settings import (
-    FRAME_PROPORTION,
-    INPUT_VIDEO_DIR,
-    MAX_VIDEO_SIZE_MB,
-    OUTPUT_FRAMES_DIR,
-)
 
 
 class FrameExtractor:
-    """Extract single frames from video files at specified proportions.
-
-    Parameters
-    ----------
-    input_dir : Path, optional
-        Directory containing video files to process. If not provided, uses value from config.
-    output_dir : Path, optional
-        Directory to save extracted frames. If not provided, uses value from config.
-    proportion : float, optional
-        Proportion of video to extract frame from (0.0 to 1.0). If not provided, uses value from config.
-    max_size_mb : int, optional
-        Maximum video file size in MB. Videos larger than this will be skipped. If not provided, uses value from config.
-    """
+    """Extract single frames from video files at specified proportions."""
 
     # Supported video file extensions
     VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv"}
 
     def __init__(
         self,
-        input_dir: Path | None = None,
-        output_dir: Path | None = None,
-        proportion: float | None = None,
-        max_size_mb: int | None = None,
+        input_dir: Path,
+        output_dir: Path,
+        proportion: float = 0.5,
+        max_size_mb: int = 500,
     ):
-        """Initialize the FrameExtractor with configuration values."""
-        self.input_dir = input_dir if input_dir is not None else INPUT_VIDEO_DIR
-        self.output_dir = output_dir if output_dir is not None else OUTPUT_FRAMES_DIR
-        self.proportion = proportion if proportion is not None else FRAME_PROPORTION
-        self.max_size_mb = max_size_mb if max_size_mb is not None else MAX_VIDEO_SIZE_MB
+        """Initialize the FrameExtractor with configuration values.
+
+        Parameters
+        ----------
+        input_dir : Path, optional
+            Directory containing video files to process. If not provided, uses value from config.
+        output_dir : Path, optional
+            Directory to save extracted frames. If not provided, uses value from config.
+        proportion : float, optional
+            Proportion of video to extract frame from (0.0 to 1.0). If not provided, uses value from config.
+        max_size_mb : int, optional
+            Maximum video file size in MB. Videos larger than this will be skipped. If not provided, uses value from config.
+        """
+        self.input_dir = input_dir
+        self.output_dir = output_dir
+        self.proportion = proportion
+        self.max_size_mb = max_size_mb
 
         # Validate proportion
         if not 0.0 <= self.proportion <= 1.0:
