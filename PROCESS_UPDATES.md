@@ -6,6 +6,34 @@ A development journey blog documenting the creation of a boat tracking system.
 
 # Phase 1: Setting Up Model Training And Performance Tracking Pipeline
 
+## Entry 9: Training Data Pipeline & Label Studio Setup
+*Date: January 30-31, 2026*
+
+### Frame Extraction & Docker-Based Annotation Workflow
+
+Built custom training data pipeline and set up automated annotation infrastructure:
+
+- **Frame Extraction Pipeline**:
+  - Created pipeline to extract frames from video for training data generation
+  - Implemented configurable frame extraction in `frame_extractor.py` with video processing utilities
+  - Built notebook interface (`01_extract_frames.ipynb`) for managing extraction workflow
+- **Label Studio Setup with Docker**:
+  - Gained a little experience with Docker containers through Label Studio deployment
+  - Set up Label Studio and Label Studio ML backend as containerized services 👏👏
+  - Configured auto-annotation workflow using YOLO model to pre-label extracted frames - did ok at prelabelling
+
+Result: Started the creation of custom training datasets for boat detection using open source software and gained experience with Docker containers.
+
+Connected YOLO model to Label Studio UI:
+
+<img src="other/images_md/Screenshot 2026-02-01 194859.png" alt="Screenshot" width="600">
+
+Used it to help prelabel training data:
+
+<img src="other/images_md/Screenshot 2026-02-01 202423.png" alt="Screenshot" width="600">
+
+---
+
 ## Entry 8: Code Quality, CI/CD & Configuration Improvements
 *Date: January 28-29, 2026*
 
