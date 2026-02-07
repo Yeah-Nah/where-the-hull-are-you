@@ -3,7 +3,7 @@
 from typing import Any
 
 import depthai as dai
-from src.config.camera_settings import CAM_HEIGHT, CAM_WIDTH
+from camera_settings import CAM_HEIGHT, CAM_WIDTH
 
 
 class CameraFeedProcessor:

@@ -1,7 +1,6 @@
-"""Utility functions for module management."""
+"""Functions for notebook utilities."""
 
 import sys
-from importlib import import_module
 
 from loguru import logger
 
@@ -17,5 +16,5 @@ def reload_module(module_name: str) -> None:
     """
     if module_name in sys.modules:
         del sys.modules[module_name]
-    import_module(module_name)
-    logger.info(f"Module {module_name} reloaded.")
+    logger.success(f"Module {module_name} unloaded.")
+    logger.info(f"Please reload {module_name} to apply changes.")

@@ -117,19 +117,14 @@ where-the-hull-are-you/
 
 ### Installation
 
-1. **Install shared metrics library** (required by other components):
+1. **Install boat tracking system dependencies and libraries** (required by other components):
 ```bash
-cd shared-tracking-metrics
 pip install -e .
+# For dev environment
+python -m pip install -e ".[dev]"
 ```
 
-2. **Install model training pipeline**:
-```bash
-cd ../model-training
-pip install -e .
-```
-
-3. **Run hyperparameter search**:
+2. **Run hyperparameter search**:
 ```bash
 # Configure search space in config/hyperparam_search_config.yaml
 # Run notebook: notebooks/03_hyperparameter_search.ipynb
@@ -139,6 +134,11 @@ cd model-training
 mlflow ui --backend-store-uri file:output/mlruns
 # Open http://localhost:5000
 ```
+
+3. **Frame extraction for custom training data**:
+In the `data-preparation/config/data_prep_config.yaml` file change:
+    - `input_video_directory` to your folder containing video files you wish to extract frames from
+    - `output_frames_directory` to a folder output location the frames will be saved to. Default location `../output/frames/`
 
 **Note**: Python 3.13+ required. See individual component READMEs for detailed usage.
 
