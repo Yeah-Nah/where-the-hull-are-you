@@ -9,4 +9,4 @@ output_frames_directory: "output/frames"
 frame_proportion: 0.5
 
 # Maximum video file size in MB (videos larger than this will be skipped)
-max_video_size_mb: 500
+max_video_size_mb: 100

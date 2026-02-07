@@ -226,3 +226,8 @@ oakd-camera-tracking/.depthai_cached_models/
 
 # Temporary tracker configuration files
 temp_tracker_configs/
+
+# Images in the data-preparation and model-training directories
+model-training/data/images/
+model-training/data/labels/
+data-preparation/output/frames/

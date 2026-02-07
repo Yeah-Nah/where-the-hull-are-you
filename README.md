@@ -117,19 +117,14 @@ where-the-hull-are-you/
 
 ### Installation
 
-1. **Install shared metrics library** (required by other components):
+1. **Install boat tracking system dependencies and libraries** (required by other components):
 ```bash
-cd shared-tracking-metrics
 pip install -e .
+# For dev environment
+python -m pip install -e ".[dev]"
 ```
 
-2. **Install model training pipeline**:
-```bash
-cd ../model-training
-pip install -e .
-```
-
-3. **Run hyperparameter search**:
+2. **Run hyperparameter search**:
 ```bash
 # Configure search space in config/hyperparam_search_config.yaml
 # Run notebook: notebooks/03_hyperparameter_search.ipynb

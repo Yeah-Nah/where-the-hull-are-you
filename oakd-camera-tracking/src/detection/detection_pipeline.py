@@ -8,6 +8,7 @@ from typing import Any
 import cv2
 import depthai as dai
 import numpy as np
+
 from src.config.model_settings import CLASS_IDS, COCO_CLASSES, CONFIDENCE_THRESHOLD
 from src.processors.camera_feed_proccessor import CameraFeedProcessor
 
