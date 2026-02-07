@@ -135,6 +135,11 @@ mlflow ui --backend-store-uri file:output/mlruns
 # Open http://localhost:5000
 ```
 
+3. **Frame extraction for custom training data**:
+In the `data-preparation/config/data_prep_config.yaml` file change:
+    - `input_video_directory` to your folder containing video files you wish to extract frames from
+    - `output_frames_directory` to a folder output location the frames will be saved to. Default location `../output/frames/`
+
 **Note**: Python 3.13+ required. See individual component READMEs for detailed usage.
 
 ## Contributing

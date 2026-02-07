@@ -19,18 +19,18 @@ class FrameExtractor:
         proportion: float = 0.5,
         max_size_mb: int = 500,
     ):
-        """Initialize the FrameExtractor with configuration values.
+        """Initialize the FrameExtractor.
 
         Parameters
         ----------
-        input_dir : Path, optional
-            Directory containing video files to process. If not provided, uses value from config.
-        output_dir : Path, optional
-            Directory to save extracted frames. If not provided, uses value from config.
+        input_dir : Path
+            Directory containing video files to process.
+        output_dir : Path
+            Directory to save extracted frames.
         proportion : float, optional
-            Proportion of video to extract frame from (0.0 to 1.0). If not provided, uses value from config.
+            Proportion of video duration at which to extract the frame (0.0 to 1.0).
         max_size_mb : int, optional
-            Maximum video file size in MB. Videos larger than this will be skipped. If not provided, uses value from config.
+            Maximum video file size in MB. Videos larger than this will be skipped.
         """
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -52,6 +52,12 @@ class FrameExtractor:
         Processes all supported video files, filters by size, and extracts
         one frame per video at the specified proportion.
         """
+        # Checking path exists and is a directory
+        if not self.input_dir.exists() or not self.input_dir.is_dir():
+            logger.error(
+                f"Input directory does not exist or is not a directory: {self.input_dir}"
+            )
+            return
         # Get all video files from input directory
         video_files = [
             f
