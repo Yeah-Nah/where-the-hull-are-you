@@ -13,7 +13,7 @@ DEFAULT_MLFLOW_URI = f"file:{BASE_DIR / 'output' / 'mlruns'}"
 # Model configuration settings
 try:
     with open(MODEL_CONFIG_FILE) as f:
-        model_config = yaml.safe_load(f)
+        MODEL_CONFIG = yaml.safe_load(f)
 except FileNotFoundError as e:
     raise FileNotFoundError(
         f"Model configuration file not found: {MODEL_CONFIG_FILE}. "
@@ -22,8 +22,7 @@ except FileNotFoundError as e:
 except yaml.YAMLError as e:
     raise ValueError(f"Error parsing model configuration file: {e}") from e
 
-MODEL_CONFIG = model_config.get("model_config", {})
-MODEL = MODEL_CONFIG.get("model", "yolov8n.pt")
+MODEL = MODEL_CONFIG.get("model_config", {}).get("model", "yolov8n.pt")
 MODEL_PATH = BASE_DIR / Path("models") / MODEL
 
 # Validate that model file exists
@@ -62,7 +61,7 @@ HYPERPARAM_SEARCH_SPACE = hyperparam_search_config.get("search_space", {})
 # Training configuration settings
 try:
     with open(TRAINING_CONFIG_FILE) as f:
-        training_config = yaml.safe_load(f)
+        TRAINING_CONFIG = yaml.safe_load(f)
 except FileNotFoundError as e:
     raise FileNotFoundError(
         f"Training configuration file not found: {TRAINING_CONFIG_FILE}. "
@@ -70,7 +69,3 @@ except FileNotFoundError as e:
     ) from e
 except yaml.YAMLError as e:
     raise ValueError(f"Error parsing training configuration file: {e}") from e
-
-TRAINING_CONFIG = training_config  # .get("training", {})
-# BASE_MODEL = TRAINING_CONFIG.get("model", {})
-# BASE_MODEL_PATH = BASE_DIR / Path("models") / BASE_MODEL

@@ -4,7 +4,7 @@ model_config:
   model: "yolov8n.pt"  # Options: yolov8n.pt, yolo11n.pt
 
   # Essential hyperparameters
-  epochs: 2                # Number of training epochs
+  epochs: 50                # Number of training epochs
   batch: 16            # Batch size (reduce if out of memory)
   imgsz: 640                # Input image size
   lr0: 0.01                 # Initial learning rate

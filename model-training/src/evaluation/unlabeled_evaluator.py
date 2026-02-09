@@ -74,7 +74,7 @@ class UnlabeledEvaluator:
         model_config = (
             config.get("model_config") if config.get("model_config") else None
         )
-        botsort_config = config.get("botsort_config")
+        botsort_config = config.get("botsort_config", None)
 
         return ModelInference(
             model_path=str(self.model_path),
