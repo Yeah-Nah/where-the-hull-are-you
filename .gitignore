@@ -231,3 +231,6 @@ temp_tracker_configs/
 model-training/data/images/
 model-training/data/labels/
 data-preparation/output/frames/
+
+# Model training runs
+model-training/notebooks/runs/
