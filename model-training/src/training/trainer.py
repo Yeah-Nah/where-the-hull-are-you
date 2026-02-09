@@ -13,18 +13,17 @@ from ultralytics import YOLO
 class ModelTrainer:
     """Train custom YOLO models for maritime object detection."""
 
-    def __init__(self, base_model_path: Path, training_config: dict[str, Any]):
+    def __init__(self, training_config: dict[str, Any]):
         """Initialize trainer with configuration.
 
         Parameters
         ----------
-        base_model_path : Path
-            Path to the base model for transfer learning
         training_config : Dict[str, Any]
             Training configuration including model, data, hyperparameters
         """
-        self.base_model = self._load_base_model(base_model_path)
-        self.training_config = training_config
+        self.model_config = training_config.get("model_config", {})
+        self.output_config = training_config.get("output_config", {})
+        self.base_model = self._load_base_model()
 
     def _create_data_yaml(self) -> Path:
         """Create data.yaml file for YOLO training.
@@ -72,12 +71,12 @@ class ModelTrainer:
         str
             Unique training run name
         """
-        base_name = self.training_config.pop("training_run_name", "custom_model")
+        base_name = self.output_config.get("training_run_name", "custom_model")
         date_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{base_name}_{date_str}"
 
     def _create_kwargs(self) -> dict[str, Any]:
-        """Create model keyword arguments from training_config.
+        """Create model keyword arguments from model configuration.
 
         Returns
         -------
@@ -95,14 +94,12 @@ class ModelTrainer:
         kwargs["name"] = self.training_run_name
 
         # Add model config parameters (remove None values)
-        if self.training_config:
-            kwargs.update(
-                {k: v for k, v in self.training_config.items() if v is not None}
-            )
+        if self.model_config:
+            kwargs.update({k: v for k, v in self.model_config.items() if v is not None})
 
         return kwargs
 
-    def _load_base_model(self, base_model_path: Path) -> None:
+    def _load_base_model(self) -> None:
         """Load base model for transfer learning.
 
         Parameters
@@ -110,6 +107,9 @@ class ModelTrainer:
         base_model_path : Path
             Path to the base model for transfer learning
         """
+        base_dir = Path(__file__).parent.parent.parent
+        base_model = self.model_config.get("model", {})
+        base_model_path = base_dir / Path("models") / base_model
         # Check the model path exists
         if base_model_path is None:
             raise ValueError(
@@ -144,7 +144,7 @@ class ModelTrainer:
         # Train the model (progress is automatically displayed by Ultralytics)
         self.base_model.train(**training_kwargs)
 
-        logger.success("\nTraining completed!")
+        logger.success("Training completed!")
 
     def save_to_custom_folder(
         self, best_weights_path: Path, custom_name: str | None = None

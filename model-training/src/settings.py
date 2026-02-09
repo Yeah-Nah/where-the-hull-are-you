@@ -71,6 +71,6 @@ except FileNotFoundError as e:
 except yaml.YAMLError as e:
     raise ValueError(f"Error parsing training configuration file: {e}") from e
 
-TRAINING_CONFIG = training_config.get("training", {})
-BASE_MODEL = TRAINING_CONFIG.get("model", {})
-BASE_MODEL_PATH = BASE_DIR / Path("models") / BASE_MODEL
+TRAINING_CONFIG = training_config  # .get("training", {})
+# BASE_MODEL = TRAINING_CONFIG.get("model", {})
+# BASE_MODEL_PATH = BASE_DIR / Path("models") / BASE_MODEL
