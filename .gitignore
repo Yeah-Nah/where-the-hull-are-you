@@ -235,3 +235,7 @@ labels.cache
 
 # Model training runs
 model-training/notebooks/runs/
+model-training/runs/
+
+# Auto-generated data.yaml files
+model-training/data/data.yaml

@@ -29,15 +29,26 @@ def log_configs(*configs) -> None:
         *configs: Variable number of configuration dictionaries to log
     """
     # Get the caller's frame to retrieve variable names
-    frame = inspect.currentframe().f_back
+    frame = inspect.currentframe()
+    caller_frame = None
     var_names = []
 
-    # Try to get the variable names from the caller
-    for var_name, var_value in frame.f_locals.items():
-        for config in configs:
-            if var_value is config:
-                var_names.append(var_name)
-                break
+    try:
+        caller_frame = frame.f_back if frame is not None else None
+
+        # Try to get the variable names from the caller
+        if caller_frame is not None:
+            for var_name, var_value in caller_frame.f_locals.items():
+                for config in configs:
+                    if var_value is config:
+                        var_names.append(var_name)
+                        break
+    finally:
+        # Break reference cycles involving frame objects
+        if frame is not None:
+            del frame
+        if caller_frame is not None:
+            del caller_frame
 
     # If we couldn't get names, use generic names
     if len(var_names) != len(configs):

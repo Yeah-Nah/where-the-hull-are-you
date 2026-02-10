@@ -1,7 +1,0 @@
-path: c:\Users\alexa\git\where-the-hull-are-you\model-training\data
-train: images
-val: images
-names:
-  0: 18ft skiff
-  1: boat
-nc: 2

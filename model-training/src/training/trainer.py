@@ -25,13 +25,13 @@ class ModelTrainer:
         self.output_config = training_config.get("output_config", {})
         self.base_model = self._load_base_model()
 
-    def _create_data_yaml(self) -> str:
-        """Create data.yaml file for YOLO training.
+    def _create_data_yaml(self, output_dir: Path) -> Path:
+        """Create data.yaml file for YOLO training in run-specific directory.
 
         Parameters
         ----------
-        output_path : Path
-            Path where data.yaml should be created
+        output_dir : Path
+            Directory where data.yaml should be created (run-specific)
 
         Returns
         -------
@@ -46,22 +46,30 @@ class ModelTrainer:
         with open(classes_file) as f:
             classes = [line.strip() for line in f if line.strip()]
 
-        # Create data.yaml content
+        # Create data.yaml content with relative path
+        # Use relative path if possible, otherwise use absolute path
+        try:
+            path_value = str(data_dir.relative_to(base_dir))
+        except ValueError:
+            # If data_dir is not relative to base_dir, use absolute path
+            path_value = str(data_dir.absolute())
+
         data_config = {
-            "path": str(data_dir.absolute()),
+            "path": path_value,
             "train": "images",
             "val": "images",  # Using same as train - no validation split
             "names": dict(enumerate(classes)),
             "nc": len(classes),
         }
 
-        # Write to file
-        output_file = data_dir / "data.yaml"
+        # Write to run-specific output directory to avoid dirty working tree
+        output_file = output_dir / "data.yaml"
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w") as f:
             yaml.dump(data_config, f, default_flow_style=False, sort_keys=False)
 
         logger.info(f"Created data.yaml at: {output_file}")
-        return str(output_file)
+        return output_file
 
     def _create_training_run_name(self) -> str:
         """Create unique training run name with datetime.
@@ -75,74 +83,111 @@ class ModelTrainer:
         date_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{base_name}_{date_str}"
 
-    def _create_kwargs(self) -> dict[str, Any]:
+    def _create_kwargs(self, output_dir: Path) -> dict[str, Any]:
         """Create model keyword arguments from model configuration.
+
+        Parameters
+        ----------
+        output_dir : Path
+            Directory for run-specific outputs (data.yaml, etc.)
 
         Returns
         -------
         dict[str, Any]
-            Keyword arguments for model.track()
+            Keyword arguments for model.train()
         """
         kwargs = {}
 
-        # Create data.yaml file for training
-        data_yaml = self._create_data_yaml()
-        kwargs["data"] = data_yaml
+        # Create data.yaml file for training in run-specific directory
+        data_yaml = self._create_data_yaml(output_dir)
+        kwargs["data"] = str(data_yaml)
 
-        # Create custom training run name with datetime for uniqueness
-        self.training_run_name = self._create_training_run_name()
+        # Use the training run name that was already set
         kwargs["name"] = self.training_run_name
 
-        # Add model config parameters (remove None values)
+        # Add model config parameters (remove None values and exclude 'model' key)
         if self.model_config:
-            kwargs.update({k: v for k, v in self.model_config.items() if v is not None})
+            kwargs.update(
+                {
+                    k: v
+                    for k, v in self.model_config.items()
+                    if v is not None and k != "model"
+                }
+            )
 
         return kwargs
 
     def _load_base_model(self) -> YOLO:
         """Load base model for transfer learning.
 
-        Parameters
-        ----------
-        base_model_path : Path
-            Path to the base model for transfer learning
+        Returns
+        -------
+        YOLO
+            Loaded YOLO model for transfer learning
+
+        Raises
+        ------
+        ValueError
+            If model name/path is not specified or empty
+        FileNotFoundError
+            If the specified model file does not exist
         """
         base_dir = Path(__file__).parent.parent.parent
         base_model = self.model_config.get("model", "")
-        base_model_path = base_dir / "models" / base_model
-        # Check the model path exists
-        if base_model_path is None:
+
+        # Validate that model is specified and not empty
+        if not base_model or not str(base_model).strip():
             raise ValueError(
-                "Base model path is not specified in training configuration."
+                "Base model name or path is not specified in training configuration."
             )
+
+        base_model_path = base_dir / "models" / base_model
+
+        # Check if the model path exists
         if not base_model_path.exists():
             msg = (
                 f"Base model not found: {base_model_path}. "
                 f"Please ensure the model exists in the models directory."
             )
             raise FileNotFoundError(msg)
-        logger.success(f"Base model loaded: {base_model_path}")
 
+        logger.success(f"Base model loaded: {base_model_path}")
         return YOLO(str(base_model_path))
 
-    def train(self) -> None:
+    def train(self) -> Path:
         """Train the model.
 
         Returns
         -------
-        None
+        Path
+            Path to the best model weights (best.pt)
         """
-        # Build training kwargs (includes training_run_name)
-        training_kwargs = self._create_kwargs()
+        # Get output directory from config or use default
+        base_dir = Path(__file__).parent.parent.parent
+        project_dir = base_dir / "runs" / "train"
+
+        # Create unique run name
+        self.training_run_name = self._create_training_run_name()
+
+        # Create run-specific directory for data.yaml and other outputs
+        output_dir = project_dir / self.training_run_name
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Build training kwargs (includes training_run_name and data.yaml in run dir)
+        training_kwargs = self._create_kwargs(output_dir)
 
         logger.info("Starting training with configuration:")
         for k, v in training_kwargs.items():
             logger.info(f"  {k}: {v}")
 
         # Train the model (progress is automatically displayed by Ultralytics)
-        self.base_model.train(**training_kwargs)
+        results = self.base_model.train(**training_kwargs)
 
-        logger.success("Training completed!")
+        # Get the best weights path from results
+        best_weights = Path(results.save_dir) / "weights" / "best.pt"
+
+        logger.success(f"Training completed! Best weights: {best_weights}")
+        return best_weights
 
     def save_to_custom_folder(
         self, best_weights_path: Path, custom_name: str | None = None
