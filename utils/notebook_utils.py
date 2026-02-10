@@ -30,6 +30,7 @@ def log_configs(*configs) -> None:
     """
     # Get the caller's frame to retrieve variable names
     frame = inspect.currentframe()
+    caller_frame = None
     var_names = []
 
     try:
@@ -44,8 +45,10 @@ def log_configs(*configs) -> None:
                         break
     finally:
         # Break reference cycles involving frame objects
-        del frame
-        del caller_frame
+        if frame is not None:
+            del frame
+        if caller_frame is not None:
+            del caller_frame
 
     # If we couldn't get names, use generic names
     if len(var_names) != len(configs):
