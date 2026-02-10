@@ -1,6 +1,9 @@
 # Transfer learning configuration for 18ft skiff detection
 model_config:
   # Base model selection to use for transfer learning
+  # Place your model file in model-training/models/ directory
+  # Or Ultralytics will auto-download on first use if using a standard model name
+  # Examples: "yolov8n.pt", "yolo11n.pt"
   model: "yolo11n.pt"  # Options: yolov8n.pt, yolo11n.pt
 
   # Essential hyperparameters
@@ -17,4 +20,4 @@ model_config:
 
 # Output settings
 output_config:
-  training_run_name: "18ft_skiff_yolo11n" # Will have datetime appened for uniqueness
+  training_run_name: "18ft_skiff_yolo11n" # Will have datetime appended for uniqueness
