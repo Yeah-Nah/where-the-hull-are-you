@@ -26,13 +26,8 @@ class ModelTrainer:
         self.base_dir = Path(__file__).parent.parent.parent
         self.base_model = self._load_base_model()
 
-    def _create_data_yaml(self, output_dir: Path) -> Path:
-        """Create data.yaml file for YOLO training in run-specific directory.
-
-        Parameters
-        ----------
-        output_dir : Path
-            Directory where data.yaml should be created (run-specific)
+    def _create_data_yaml(self) -> Path:
+        """Create data.yaml file for YOLO training in data directory.
 
         Returns
         -------
@@ -46,29 +41,20 @@ class ModelTrainer:
         with open(classes_file) as f:
             classes = [line.strip() for line in f if line.strip()]
 
-        # Create data.yaml content with relative path
-        # Use relative path if possible, otherwise use absolute path
-        try:
-            path_value = str(data_dir.relative_to(self.base_dir))
-        except ValueError:
-            # If data_dir is not relative to base_dir, use absolute path
-            path_value = str(data_dir.absolute())
-
         data_config = {
-            "path": path_value,
+            "path": str(data_dir),
             "train": "images",
             "val": "images",  # Using same as train - no validation split
             "names": dict(enumerate(classes)),
             "nc": len(classes),
         }
 
-        # Write to run-specific output directory to avoid dirty working tree
-        output_file = output_dir / "data.yaml"
+        # Write to data directory
+        output_file = data_dir / "data.yaml"
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with open(output_file, "w") as f:
             yaml.dump(data_config, f, default_flow_style=False, sort_keys=False)
 
-        logger.info(f"Created data.yaml at: {output_file}")
         return output_file
 
     def _create_training_run_name(self) -> str:
@@ -83,13 +69,8 @@ class ModelTrainer:
         date_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{base_name}_{date_str}"
 
-    def _create_kwargs(self, output_dir: Path) -> dict[str, Any]:
+    def _create_kwargs(self) -> dict[str, Any]:
         """Create model keyword arguments from model configuration.
-
-        Parameters
-        ----------
-        output_dir : Path
-            Directory for run-specific outputs (data.yaml, etc.)
 
         Returns
         -------
@@ -99,7 +80,7 @@ class ModelTrainer:
         kwargs = {}
 
         # Create data.yaml file for training in run-specific directory
-        data_yaml = self._create_data_yaml(output_dir)
+        data_yaml = self._create_data_yaml()
         kwargs["data"] = str(data_yaml)
 
         # Use the training run name that was already set
@@ -186,18 +167,11 @@ class ModelTrainer:
         -------
         None
         """
-        # Get output directory from config or use default
-        project_dir = self.base_dir / "runs" / "train"
-
         # Create unique run name
         self.training_run_name = self._create_training_run_name()
 
-        # Create run-specific directory for data.yaml and other outputs
-        output_dir = project_dir / self.training_run_name
-        output_dir.mkdir(parents=True, exist_ok=True)
-
         # Build training kwargs (includes training_run_name and data.yaml in run dir)
-        training_kwargs = self._create_kwargs(output_dir)
+        training_kwargs = self._create_kwargs()
 
         logger.info("Starting training with configuration:")
         for k, v in training_kwargs.items():

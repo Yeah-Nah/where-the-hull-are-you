@@ -2,6 +2,7 @@
 
 import inspect
 import sys
+from typing import Any
 
 from loguru import logger
 
@@ -21,7 +22,7 @@ def reload_module(module_name: str) -> None:
     logger.info(f"Please reload {module_name} to apply changes.")
 
 
-def log_configs(*configs) -> None:
+def log_configs(*configs: dict[str, Any]) -> None:
     """
     Log multiple configuration parameters with their names and values.
 
