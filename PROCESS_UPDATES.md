@@ -6,6 +6,36 @@ A development journey blog documenting the creation of a boat tracking system.
 
 # Phase 1: Setting Up Model Training And Performance Tracking Pipeline
 
+## Entry 10: Transfer Learning with Custom YOLO Models
+*Date: February 10, 2026*
+
+### Fine-Tuning Pre-Trained Models on Custom Boat Dataset
+
+Implemented transfer learning pipeline to adapt YOLO models for specialized boat detection:
+
+- **Custom Training Data**:
+  - Compiled custom dataset from extracted frames with Label Studio annotations
+  - Organized training data with proper YOLO format (images + labels directories)
+  - Created `data.yaml` configuration specifying classes and dataset paths
+- **Transfer Learning Implementation**:
+  - Built `ModelTrainer` class in `training/trainer.py` for fine-tuning pre-trained YOLO models
+  - Leveraged YOLO11n and YOLOv8n base weights as starting points for boat-specific training
+  - Configured training parameters via `training_config.yaml` for reproducible experiments
+  - Created training notebook (`01_train_custom_model.ipynb`) for interactive model development
+- **Configuration Management**:
+  - Developed `log_configs()` utility function to automatically log configuration parameters using variable name introspection
+  - Implemented nested dictionary logging for comprehensive parameter tracking
+  - Integrated logging throughout training pipeline for debugging and reproducibility
+
+Result: Transfer learning pipeline that fine-tunes given YOLO models on custom boat detection data, improving tracking performance of custom trained model
+from mean tracking confidence (on single video comparison) from 0.45 to 0.93. Woot. Heading in the right direction.
+
+Transfer learning pipeline with predictions on validation data. Probably overfitting because there's only 100 annotated images but whatever!
+
+<img src="other/images_md/Screenshot 2026-02-10 133812.png" alt="Screenshot" width="600">
+
+---
+
 ## Entry 9: Training Data Pipeline & Label Studio Setup
 *Date: January 30-31, 2026*
 

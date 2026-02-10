@@ -1,10 +1,10 @@
 # Transfer learning configuration for 18ft skiff detection
 model_config:
   # Base model selection to use for transfer learning
-  model: "yolov8n.pt"  # Options: yolov8n.pt, yolo11n.pt
+  model: "yolo11n.pt"  # Options: yolov8n.pt, yolo11n.pt
 
   # Essential hyperparameters
-  epochs: 50                # Number of training epochs
+  epochs: 100                # Number of training epochs
   batch: 16            # Batch size (reduce if out of memory)
   imgsz: 640                # Input image size
   lr0: 0.01                 # Initial learning rate
@@ -17,4 +17,4 @@ model_config:
 
 # Output settings
 output_config:
-  training_run_name: "18ft_skiff_v1" # Will have datetime appened for uniqueness
+  training_run_name: "18ft_skiff_yolo11n" # Will have datetime appened for uniqueness
