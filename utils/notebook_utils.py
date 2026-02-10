@@ -45,8 +45,7 @@ def log_configs(*configs) -> None:
     finally:
         # Break reference cycles involving frame objects
         del frame
-        if "caller_frame" in locals():
-            del caller_frame
+        del caller_frame
 
     # If we couldn't get names, use generic names
     if len(var_names) != len(configs):

@@ -47,8 +47,15 @@ class ModelTrainer:
             classes = [line.strip() for line in f if line.strip()]
 
         # Create data.yaml content with relative path
+        # Use relative path if possible, otherwise use absolute path
+        try:
+            path_value = str(data_dir.relative_to(base_dir))
+        except ValueError:
+            # If data_dir is not relative to base_dir, use absolute path
+            path_value = str(data_dir.absolute())
+
         data_config = {
-            "path": str(data_dir.relative_to(base_dir)),
+            "path": path_value,
             "train": "images",
             "val": "images",  # Using same as train - no validation split
             "names": dict(enumerate(classes)),
