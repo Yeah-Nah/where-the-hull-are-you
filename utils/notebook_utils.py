@@ -67,4 +67,3 @@ def log_configs(*configs) -> None:
                     logger.info(f"{key}: {value}")
         else:
             logger.info(f"Value: {config}")
-        logger.info("=" * (len(name) + 8))
