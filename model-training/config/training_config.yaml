@@ -1,0 +1,23 @@
+# Transfer learning configuration for 18ft skiff detection
+model_config:
+  # Base model selection to use for transfer learning
+  # Place your model file in model-training/models/ directory
+  # Or Ultralytics will auto-download on first use if using a standard model name
+  # Examples: "yolov8n.pt", "yolo11n.pt"
+  model: "yolo11n.pt"  # Options: yolov8n.pt, yolo11n.pt
+
+  # Essential hyperparameters
+  epochs: 100                # Number of training epochs
+  batch: 16            # Batch size (reduce if out of memory)
+  imgsz: 640                # Input image size
+  lr0: 0.01                 # Initial learning rate
+
+  rect: True                # Use rectangular training (preserve aspect ratio)
+
+  classes: [0]           # The class or classes to train on (0 for single class, or list of class indices)
+
+  exist_ok: True
+
+# Output settings
+output_config:
+  training_run_name: "18ft_skiff_yolo11n" # Will have datetime appended for uniqueness

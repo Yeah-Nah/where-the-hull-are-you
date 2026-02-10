@@ -7,12 +7,13 @@ import yaml
 BASE_DIR = Path(__file__).parent.parent
 MODEL_CONFIG_FILE = BASE_DIR / "config" / "model_config.yaml"
 HYPERPARAM_SEARCH_CONFIG_FILE = BASE_DIR / "config" / "hyperparam_search_config.yaml"
+TRAINING_CONFIG_FILE = BASE_DIR / "config" / "training_config.yaml"
 DEFAULT_MLFLOW_URI = f"file:{BASE_DIR / 'output' / 'mlruns'}"
 
 # Model configuration settings
 try:
     with open(MODEL_CONFIG_FILE) as f:
-        model_config = yaml.safe_load(f)
+        MODEL_CONFIG = yaml.safe_load(f)
 except FileNotFoundError as e:
     raise FileNotFoundError(
         f"Model configuration file not found: {MODEL_CONFIG_FILE}. "
@@ -21,8 +22,7 @@ except FileNotFoundError as e:
 except yaml.YAMLError as e:
     raise ValueError(f"Error parsing model configuration file: {e}") from e
 
-MODEL_CONFIG = model_config.get("model_config", {})
-MODEL = MODEL_CONFIG.get("model", "yolov8n.pt")
+MODEL = MODEL_CONFIG.get("model_config", {}).get("model", "yolov8n.pt")
 MODEL_PATH = BASE_DIR / Path("models") / MODEL
 
 # Validate that model file exists
@@ -57,3 +57,15 @@ except yaml.YAMLError as e:
     ) from e
 
 HYPERPARAM_SEARCH_SPACE = hyperparam_search_config.get("search_space", {})
+
+# Training configuration settings
+try:
+    with open(TRAINING_CONFIG_FILE) as f:
+        TRAINING_CONFIG = yaml.safe_load(f)
+except FileNotFoundError as e:
+    raise FileNotFoundError(
+        f"Training configuration file not found: {TRAINING_CONFIG_FILE}. "
+        "Please ensure the file exists and the path is correct."
+    ) from e
+except yaml.YAMLError as e:
+    raise ValueError(f"Error parsing training configuration file: {e}") from e
