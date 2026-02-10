@@ -25,7 +25,7 @@ class ModelTrainer:
         self.output_config = training_config.get("output_config", {})
         self.base_model = self._load_base_model()
 
-    def _create_data_yaml(self) -> Path:
+    def _create_data_yaml(self) -> str:
         """Create data.yaml file for YOLO training.
 
         Parameters
@@ -61,7 +61,7 @@ class ModelTrainer:
             yaml.dump(data_config, f, default_flow_style=False, sort_keys=False)
 
         logger.info(f"Created data.yaml at: {output_file}")
-        return output_file
+        return str(output_file)
 
     def _create_training_run_name(self) -> str:
         """Create unique training run name with datetime.
@@ -99,7 +99,7 @@ class ModelTrainer:
 
         return kwargs
 
-    def _load_base_model(self) -> None:
+    def _load_base_model(self) -> YOLO:
         """Load base model for transfer learning.
 
         Parameters
@@ -108,8 +108,8 @@ class ModelTrainer:
             Path to the base model for transfer learning
         """
         base_dir = Path(__file__).parent.parent.parent
-        base_model = self.model_config.get("model", {})
-        base_model_path = base_dir / Path("models") / base_model
+        base_model = self.model_config.get("model", "")
+        base_model_path = base_dir / "models" / base_model
         # Check the model path exists
         if base_model_path is None:
             raise ValueError(
@@ -122,22 +122,20 @@ class ModelTrainer:
             )
             raise FileNotFoundError(msg)
         logger.success(f"Base model loaded: {base_model_path}")
+
         return YOLO(str(base_model_path))
 
-    def train(
-        self,
-    ) -> Path:
+    def train(self) -> None:
         """Train the model.
 
         Returns
         -------
-        Path
-            Path to best model weights
+        None
         """
         # Build training kwargs (includes training_run_name)
         training_kwargs = self._create_kwargs()
 
-        logger.info("\nStarting training with configuration:")
+        logger.info("Starting training with configuration:")
         for k, v in training_kwargs.items():
             logger.info(f"  {k}: {v}")
 
