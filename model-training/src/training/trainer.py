@@ -23,6 +23,7 @@ class ModelTrainer:
         """
         self.model_config = training_config.get("model_config", {})
         self.output_config = training_config.get("output_config", {})
+        self.base_dir = Path(__file__).parent.parent.parent
         self.base_model = self._load_base_model()
 
     def _create_data_yaml(self, output_dir: Path) -> Path:
@@ -38,8 +39,7 @@ class ModelTrainer:
         Path
             Path to created data.yaml file
         """
-        base_dir = Path(__file__).parent.parent.parent
-        data_dir = base_dir / "data"
+        data_dir = self.base_dir / "data"
 
         # Read classes from classes.txt
         classes_file = data_dir / "classes.txt"
@@ -49,7 +49,7 @@ class ModelTrainer:
         # Create data.yaml content with relative path
         # Use relative path if possible, otherwise use absolute path
         try:
-            path_value = str(data_dir.relative_to(base_dir))
+            path_value = str(data_dir.relative_to(self.base_dir))
         except ValueError:
             # If data_dir is not relative to base_dir, use absolute path
             path_value = str(data_dir.absolute())
@@ -132,7 +132,6 @@ class ModelTrainer:
         FileNotFoundError
             If the specified model file does not exist
         """
-        base_dir = Path(__file__).parent.parent.parent
         base_model = self.model_config.get("model", "")
 
         # Validate that model is specified and not empty
@@ -141,7 +140,7 @@ class ModelTrainer:
                 "Base model name or path is not specified in training configuration."
             )
 
-        base_model_path = base_dir / "models" / base_model
+        base_model_path = self.base_dir / "models" / base_model
 
         # Check if the model path exists
         if not base_model_path.exists():
@@ -154,17 +153,41 @@ class ModelTrainer:
         logger.success(f"Base model loaded: {base_model_path}")
         return YOLO(str(base_model_path))
 
-    def train(self) -> Path:
+    def _save_to_custom_folder(
+        self,
+        best_weights_path: Path,
+    ) -> None:
+        """Save trained model to custom models folder.
+
+        Parameters
+        ----------
+        best_weights_path : Path
+            Path to best.pt from training
+
+        Returns
+        -------
+        None
+        """
+        custom_dir = self.base_dir / "models" / "custom"
+        custom_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate filename
+        dest_path = custom_dir / f"{self.training_run_name}.pt"
+
+        # Copy best weights to custom folder
+        shutil.copy2(best_weights_path, dest_path)
+
+        logger.info(f"Model saved to: {dest_path}")
+
+    def train(self) -> None:
         """Train the model.
 
         Returns
         -------
-        Path
-            Path to the best model weights (best.pt)
+        None
         """
         # Get output directory from config or use default
-        base_dir = Path(__file__).parent.parent.parent
-        project_dir = base_dir / "runs" / "train"
+        project_dir = self.base_dir / "runs" / "train"
 
         # Create unique run name
         self.training_run_name = self._create_training_run_name()
@@ -187,37 +210,6 @@ class ModelTrainer:
         best_weights = Path(results.save_dir) / "weights" / "best.pt"
 
         logger.success(f"Training completed! Best weights: {best_weights}")
-        return best_weights
 
-    def save_to_custom_folder(
-        self, best_weights_path: Path, custom_name: str | None = None
-    ) -> Path:
-        """Save trained model to custom models folder.
-
-        Parameters
-        ----------
-        best_weights_path : Path
-            Path to best.pt from training
-        custom_name : str, optional
-            Custom name for saved model (uses training name if None)
-
-        Returns
-        -------
-        Path
-            Path to saved model in custom folder
-        """
-        base_dir = Path(__file__).parent.parent.parent
-        custom_dir = base_dir / "models" / "custom"
-        custom_dir.mkdir(parents=True, exist_ok=True)
-
-        # Generate filename
-        if custom_name is not None:
-            dest_path = custom_dir / f"{custom_name}.pt"
-        else:
-            dest_path = custom_dir / f"{self.training_run_name}.pt"
-
-        # Copy best weights to custom folder
-        shutil.copy2(best_weights_path, dest_path)
-
-        logger.info(f"\nModel saved to: {dest_path}")
-        return dest_path
+        # Save best weights to custom models folder
+        self._save_to_custom_folder(best_weights)
