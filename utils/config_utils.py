@@ -35,7 +35,7 @@ def load_yaml(path: Path) -> dict[str, Any]:
         raise ValueError(f"Error parsing configuration file {path}: {e}") from e
 
 
-def validate_model_path(base_dir: Path, config: dict[str, Any]) -> Path:
+def validate_model_path(base_dir: Path, config: dict[str, Any]) -> str:
     """Validate the model path from configuration.
 
     Parameters
@@ -67,4 +67,4 @@ def validate_model_path(base_dir: Path, config: dict[str, Any]) -> Path:
 
     logger.success(f"Model file found: {model_path}")
 
-    return Path(model_path)
+    return str(model_path)

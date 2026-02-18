@@ -41,10 +41,11 @@ class ModelTrainer:
         with open(classes_file) as f:
             classes = [line.strip() for line in f if line.strip()]
 
+        # Use relative path (. = current directory where data.yaml sits)
         data_config = {
-            "path": str(data_dir),
+            "path": ".",  # ✓ Relative to data.yaml location
             "train": "images",
-            "val": "images",  # Using same as train - no validation split
+            "val": "images",
             "names": dict(enumerate(classes)),
             "nc": len(classes),
         }
@@ -79,7 +80,7 @@ class ModelTrainer:
         """
         kwargs = {}
 
-        # Create data.yaml file for training in run-specific directory
+        # Create data.yaml file for training in shared data directory
         data_yaml = self._create_data_yaml()
         kwargs["data"] = str(data_yaml)
 
