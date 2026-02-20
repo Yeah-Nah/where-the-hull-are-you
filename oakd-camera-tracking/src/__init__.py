@@ -1,1 +1,0 @@
-"""Intitate package."""

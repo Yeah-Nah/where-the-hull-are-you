@@ -2,70 +2,18 @@
 
 from pathlib import Path
 
-import yaml
+from utils.config_utils import load_yaml, validate_model_path
 
+# Base paths
 BASE_DIR = Path(__file__).parent.parent
-MODEL_CONFIG_FILE = BASE_DIR / "config" / "model_config.yaml"
-HYPERPARAM_SEARCH_CONFIG_FILE = BASE_DIR / "config" / "hyperparam_search_config.yaml"
-TRAINING_CONFIG_FILE = BASE_DIR / "config" / "training_config.yaml"
 DEFAULT_MLFLOW_URI = f"file:{BASE_DIR / 'output' / 'mlruns'}"
 
-# Model configuration settings
-try:
-    with open(MODEL_CONFIG_FILE) as f:
-        MODEL_CONFIG = yaml.safe_load(f)
-except FileNotFoundError as e:
-    raise FileNotFoundError(
-        f"Model configuration file not found: {MODEL_CONFIG_FILE}. "
-        "Please ensure the file exists and the path is correct."
-    ) from e
-except yaml.YAMLError as e:
-    raise ValueError(f"Error parsing model configuration file: {e}") from e
+# Load configurations
+MODEL_CONFIG = load_yaml(BASE_DIR / "config" / "model_config.yaml")
+HYPERPARAM_SEARCH_SPACE = load_yaml(
+    BASE_DIR / "config" / "hyperparam_search_config.yaml"
+).get("search_space", {})
+TRAINING_CONFIG = load_yaml(BASE_DIR / "config" / "training_config.yaml")
 
-MODEL = MODEL_CONFIG.get("model_config", {}).get("model", "yolov8n.pt")
-MODEL_PATH = BASE_DIR / Path("models") / MODEL
-
-# Validate that model file exists
-if not MODEL_PATH.exists():
-    raise FileNotFoundError(
-        f"Model file not found: {MODEL_PATH}. "
-        f"Please ensure the model exists in the models directory. "
-        f"Current MODEL setting: {MODEL}"
-    )
-
-# Validate model file extension
-VALID_MODEL_EXTENSIONS = {".pt"}
-if MODEL_PATH.suffix not in VALID_MODEL_EXTENSIONS:
-    raise ValueError(
-        f"Invalid model file extension: {MODEL_PATH.suffix}. "
-        f"Expected one of {VALID_MODEL_EXTENSIONS}. "
-        f"Model file: {MODEL_PATH}"
-    )
-
-# Search space configuration settings
-try:
-    with open(HYPERPARAM_SEARCH_CONFIG_FILE) as f:
-        hyperparam_search_config = yaml.safe_load(f)
-except FileNotFoundError as e:
-    raise FileNotFoundError(
-        f"Hyperparameter search configuration file not found: {HYPERPARAM_SEARCH_CONFIG_FILE}. "
-        "Please ensure the file exists and the path is correct."
-    ) from e
-except yaml.YAMLError as e:
-    raise ValueError(
-        f"Error parsing hyperparameter search configuration file: {e}"
-    ) from e
-
-HYPERPARAM_SEARCH_SPACE = hyperparam_search_config.get("search_space", {})
-
-# Training configuration settings
-try:
-    with open(TRAINING_CONFIG_FILE) as f:
-        TRAINING_CONFIG = yaml.safe_load(f)
-except FileNotFoundError as e:
-    raise FileNotFoundError(
-        f"Training configuration file not found: {TRAINING_CONFIG_FILE}. "
-        "Please ensure the file exists and the path is correct."
-    ) from e
-except yaml.YAMLError as e:
-    raise ValueError(f"Error parsing training configuration file: {e}") from e
+# Checking model path validity
+MODEL_CONFIG["model_path"] = validate_model_path(BASE_DIR, MODEL_CONFIG)

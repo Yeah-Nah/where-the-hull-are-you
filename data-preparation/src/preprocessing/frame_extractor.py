@@ -60,9 +60,11 @@ class FrameExtractor:
             return
         # Get all video files from input directory
         video_files = [
-            f
-            for f in self.input_dir.iterdir()
-            if f.is_file() and f.suffix.lower() in self.VIDEO_EXTENSIONS
+            file
+            for file in self.input_dir.iterdir()
+            if file.is_file()
+            and file.suffix.lower() in self.VIDEO_EXTENSIONS
+            and "~" not in file.name
         ]
 
         if not video_files:
@@ -146,7 +148,7 @@ class FrameExtractor:
                 return False
 
             # Generate output filename
-            output_filename = f"{video_path.stem}_frame.png"
+            output_filename = f"{video_path.stem}_frame_{self.proportion}.png"
             output_path = self.output_dir / output_filename
 
             # Save frame

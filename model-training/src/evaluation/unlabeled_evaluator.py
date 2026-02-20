@@ -34,52 +34,49 @@ class UnlabeledEvaluator:
         "short_track_ratio",
     ]
 
-    def __init__(self, model_path: Path):
+    def __init__(self, config: dict[str, Any]):
         """Initialize evaluator with model.
 
         Parameters
         ----------
-        model_path : Path
-            Path to model weights
+        config : dict
+            Configuration dictionary containing model_config with 'model' key specifying model filename in models/ directory
         """
-        self.model_path = model_path
+        self.config = config
+        self.model_config, self.botsort_config, self.model_path = self._load_configs()
         self.collector = TrackingMetricsCollector()
         self.calculator = MetricsCalculator(self.collector)
 
-    def _create_inference(self, config: dict[str, Any]) -> ModelInference:
-        """Create model inference for given config.
+    def _load_configs(
+        self,
+    ) -> tuple[dict[str, Any], dict[str, Any] | None, str]:
+        """Load and validate configurations.
 
-        Parameters
-        ----------
-        config : dict
-            Configuration dictionary containing model_config and optional botsort_config
+        Returns
+        -------
+        Tuple[dict, dict, str]
+            Tuple containing model_config, botsort_config dictionaries, and model_path
+        """
+        model_config = self.config.get("model_config", {})
+        botsort_config = self.config.get("botsort_config", None)
+        model_path = self.config.get("model_path", "")
+
+        return model_config, botsort_config, model_path
+
+    def _create_inference(self, config: dict[str, Any] | None) -> ModelInference:
+        """Create model inference for given config.
 
         Returns
         -------
         ModelInference
             Configured inference instance
-
-        Raises
-        ------
-        ValueError
-            If config structure is invalid (missing 'model_config' key)
         """
-        # Validate config structure
-        if "model_config" not in config:
-            raise ValueError(
-                "Invalid config structure: expected nested dict with 'model_config' key. "
-                "Config should be: {'model_config': {...}, 'botsort_config': {...}}"
-            )
-
-        model_config = (
-            config.get("model_config") if config.get("model_config") else None
-        )
-        botsort_config = config.get("botsort_config")
+        model_config = config if config is not None else self.model_config
 
         return ModelInference(
-            model_path=str(self.model_path),
+            model_path=self.model_path,
             model_config=model_config,
-            tracker_config=botsort_config,
+            tracker_config=self.botsort_config,
         )
 
     def _get_video_properties(self, cap: cv2.VideoCapture) -> dict[str, int]:
@@ -207,7 +204,7 @@ class UnlabeledEvaluator:
     def evaluate_single_video(
         self,
         video_path: Path | str,
-        model_config: dict[str, Any],
+        config: dict[str, Any] | None = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> dict[str, Any]:
         """Evaluate model on single video.
@@ -216,8 +213,8 @@ class UnlabeledEvaluator:
         ----------
         video_path : Path | str
             Path to video file
-        model_config : dict
-            Configuration for model
+        config : dict[str, Any] | None
+            Optional configuration dictionary
         batch_size : int
             Number of frames to process at once
 
@@ -227,7 +224,7 @@ class UnlabeledEvaluator:
             Dictionary containing video metadata and computed metrics
         """
         video_path = Path(video_path)
-        inference = self._create_inference(model_config)
+        inference = self._create_inference(config)
         frame_count = self._process_single_video(video_path, inference, batch_size)
 
         logger.info("Computing metrics...")
@@ -344,7 +341,7 @@ class UnlabeledEvaluator:
     def evaluate_unlabeled_videos(
         self,
         folder_path: Path | str,
-        model_config: dict[str, Any],
+        config: dict[str, Any] | None = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> dict[str, Any]:
         """Evaluate model on multiple unlabeled videos with weighted aggregation.
@@ -353,8 +350,8 @@ class UnlabeledEvaluator:
         ----------
         folder_path : Path | str
             Path to folder containing video files
-        model_config : dict
-            Model configuration dictionary
+        config : dict[str, Any] | None
+            Optional configuration dictionary
         batch_size : int
             Number of frames to process at once
 
@@ -374,9 +371,7 @@ class UnlabeledEvaluator:
         per_video_metrics = []
         for video_path in video_files:
             logger.info(f"Processing {video_path.name}...")
-            video_metrics = self.evaluate_single_video(
-                video_path, model_config, batch_size
-            )
+            video_metrics = self.evaluate_single_video(video_path, config, batch_size)
             per_video_metrics.append(video_metrics)
             metrics_dict = video_metrics.get("metrics", {})
             if isinstance(metrics_dict, dict):
@@ -494,7 +489,8 @@ class UnlabeledEvaluator:
             Parameters to log (must contain 'model_config', optionally 'botsort_config')
         """
         # Log model name
-        mlflow.log_param("model_name", Path(self.model_path).name)
+        model_name = self.model_config.get("model", "")
+        mlflow.log_param("model_name", model_name)
 
         if "model_config" in params:
             mlflow.log_params(params["model_config"])
