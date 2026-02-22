@@ -6,6 +6,25 @@ A development journey blog documenting the creation of a boat tracking system.
 
 # Phase 1: Setting Up Model Training And Performance Tracking Pipeline
 
+## Entry 11: Annotated Video Export Feature
+*Date: February 20, 2026*
+
+### Saving Annotated Videos for Visual Inspection
+
+Added functionality to export annotated videos with bounding boxes and tracking information:
+
+- **Output Directory Management**: Configured output folder structure for saving processed videos
+- **Video Annotation Export**: Implemented feature to save annotated video frames with detection overlays and track IDs
+- **Visual Inspection Pipeline**: Enables quick review of model predictions and tracking performance on test videos without re-running inference
+
+Result: Simple but effective tool for visually validating detection and tracking quality on custom boat detection models.
+
+Example of the custom trained yolo model on some video files. Even works for boats that are at a distance 😁
+
+<img src="other/images_md/Screenshot 2026-02-20 161655.png" alt="Screenshot" width="300">
+
+---
+
 ## Entry 10: Transfer Learning with Custom YOLO Models
 *Date: February 10, 2026*
 

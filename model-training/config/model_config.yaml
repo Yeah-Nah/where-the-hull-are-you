@@ -1,5 +1,5 @@
 model_config:
-  conf: 0.3 # Detection confidence threshold
+  conf: 0.7 # Detection confidence threshold
   classes: [0] # Class IDs to detect (e.g., 0 for person, 8 for boat)
   persist: True # Persist tracks across frames
   verbose: False # Disable verbose output

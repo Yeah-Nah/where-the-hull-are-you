@@ -14,7 +14,7 @@ import numpy as np
 from loguru import logger
 
 # Local
-from settings import DEFAULT_MLFLOW_URI
+from settings import DEFAULT_ANNOTATED_VIDEOS_DIR, DEFAULT_MLFLOW_URI
 from tracking_metrics import MetricsCalculator, ModelInference, TrackingMetricsCollector
 
 
@@ -99,6 +99,41 @@ class UnlabeledEvaluator:
             "frame_count": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
         }
 
+    def _draw_detections_on_frame(
+        self, frame: np.ndarray, detections: list[dict[str, Any]]
+    ) -> np.ndarray:
+        """Draw bounding boxes and track info on a frame.
+
+        Parameters
+        ----------
+        frame : np.ndarray
+            Video frame to annotate
+        detections : list[dict]
+            Detections with 'bbox', 'track_id', and 'confidence' keys
+
+        Returns
+        -------
+        np.ndarray
+            Annotated copy of the frame
+        """
+        annotated = frame.copy()
+        for det in detections:
+            x1, y1, x2, y2 = (int(v) for v in det["bbox"])
+            track_id = det["track_id"]
+            confidence = det["confidence"]
+            cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            label = f"id:{track_id} {confidence:.2f}"
+            cv2.putText(
+                annotated,
+                label,
+                (x1, max(y1 - 5, 0)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                1,
+            )
+        return annotated
+
     def _read_video(self, cap: cv2.VideoCapture) -> Generator[np.ndarray]:
         """Read video frames.
 
@@ -117,7 +152,11 @@ class UnlabeledEvaluator:
             cap.release()
 
     def _process_batch(
-        self, inference: ModelInference, frames: list[np.ndarray], frame_ids: list[int]
+        self,
+        inference: ModelInference,
+        frames: list[np.ndarray],
+        frame_ids: list[int],
+        writer: cv2.VideoWriter | None = None,
     ) -> None:
         """Process a batch of frames and collect detections.
 
@@ -129,20 +168,28 @@ class UnlabeledEvaluator:
             Batch of frames to process
         frame_ids : list[int]
             Corresponding frame IDs
+        writer : cv2.VideoWriter | None
+            Optional video writer for saving annotated frames
         """
         if not frames:
             return
 
         batch_detections = inference.predict_batch_frames(frames)
-        for fid, detections in zip(frame_ids, batch_detections, strict=True):
+        for frame, fid, detections in zip(
+            frames, frame_ids, batch_detections, strict=True
+        ):
             self.collector.add_batch_detection_with_track(detections, fid)
             self.collector.frame_count += 1
+            if writer is not None:
+                annotated_frame = self._draw_detections_on_frame(frame, detections)
+                writer.write(annotated_frame)
 
     def _process_single_video(
         self,
         video_path: Path,
         inference: ModelInference,
         frame_batch_size: int = 16,
+        output_path: Path | None = None,
     ) -> int:
         """Process single video and collect tracking data.
 
@@ -154,6 +201,8 @@ class UnlabeledEvaluator:
             Instance of inference class
         frame_batch_size : int
             Number of frames to process at once
+        output_path : Path | None
+            Optional path to save annotated video
 
         Returns
         -------
@@ -168,25 +217,42 @@ class UnlabeledEvaluator:
             raise ValueError(f"Could not open video: {video_path}")
 
         props = self._get_video_properties(cap)
+        fps = props["fps"] if props["fps"] > 0 else 30
         frame_batch = []
         frame_ids = []
         last_frame_id = -1
 
-        for frame_id, frame in enumerate(self._read_video(cap)):
-            frame_batch.append(frame)
-            frame_ids.append(frame_id)
-            last_frame_id = frame_id
+        writer = None
+        if output_path is not None:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            writer = cv2.VideoWriter(
+                str(output_path), fourcc, fps, (props["width"], props["height"])
+            )
+            if not writer.isOpened():
+                raise ValueError(f"Could not open video writer for: {output_path}")
 
-            if len(frame_batch) == frame_batch_size:
-                self._process_batch(inference, frame_batch, frame_ids)
-                frame_batch = []
-                frame_ids = []
+        try:
+            for frame_id, frame in enumerate(self._read_video(cap)):
+                frame_batch.append(frame)
+                frame_ids.append(frame_id)
+                last_frame_id = frame_id
 
-            if frame_id % self.PROGRESS_LOG_INTERVAL == 0:
-                logger.debug(f"Processed frame {frame_id}")
+                if len(frame_batch) == frame_batch_size:
+                    self._process_batch(inference, frame_batch, frame_ids, writer)
+                    frame_batch = []
+                    frame_ids = []
 
-        # Process remaining frames
-        self._process_batch(inference, frame_batch, frame_ids)
+                if frame_id % self.PROGRESS_LOG_INTERVAL == 0:
+                    logger.debug(f"Processed frame {frame_id}")
+
+            # Process remaining frames
+            self._process_batch(inference, frame_batch, frame_ids, writer)
+        finally:
+            if writer is not None:
+                writer.release()
+                logger.info(f"Annotated video saved to: {output_path}")
+
         cv2.destroyAllWindows()
 
         # Return actual processed count, warn if differs from metadata
@@ -206,6 +272,7 @@ class UnlabeledEvaluator:
         video_path: Path | str,
         config: dict[str, Any] | None = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
+        save_annotated_video: bool = False,
     ) -> dict[str, Any]:
         """Evaluate model on single video.
 
@@ -217,6 +284,10 @@ class UnlabeledEvaluator:
             Optional configuration dictionary
         batch_size : int
             Number of frames to process at once
+        save_annotated_video : bool
+            If True, saves an annotated copy of the video with bounding boxes
+            to the configured annotated videos output directory DEFAULT_ANNOTATED_VIDEOS_DIR
+            and saves with filename format <original_name>_annotated.mp4
 
         Returns
         -------
@@ -225,7 +296,14 @@ class UnlabeledEvaluator:
         """
         video_path = Path(video_path)
         inference = self._create_inference(config)
-        frame_count = self._process_single_video(video_path, inference, batch_size)
+        output_path = None
+        if save_annotated_video:
+            output_path = (
+                DEFAULT_ANNOTATED_VIDEOS_DIR / f"{video_path.stem}_annotated.mp4"
+            )
+        frame_count = self._process_single_video(
+            video_path, inference, batch_size, output_path
+        )
 
         logger.info("Computing metrics...")
         metrics = self.calculator.compute_all_metrics(total_frames=frame_count)
@@ -343,6 +421,7 @@ class UnlabeledEvaluator:
         folder_path: Path | str,
         config: dict[str, Any] | None = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
+        save_annotated_video: bool = False,
     ) -> dict[str, Any]:
         """Evaluate model on multiple unlabeled videos with weighted aggregation.
 
@@ -354,6 +433,9 @@ class UnlabeledEvaluator:
             Optional configuration dictionary
         batch_size : int
             Number of frames to process at once
+        save_annotated_video : bool
+            If True, saves annotated copies of each video with bounding boxes
+            to the configured annotated videos output directory
 
         Returns
         -------
@@ -371,7 +453,9 @@ class UnlabeledEvaluator:
         per_video_metrics = []
         for video_path in video_files:
             logger.info(f"Processing {video_path.name}...")
-            video_metrics = self.evaluate_single_video(video_path, config, batch_size)
+            video_metrics = self.evaluate_single_video(
+                video_path, config, batch_size, save_annotated_video
+            )
             per_video_metrics.append(video_metrics)
             metrics_dict = video_metrics.get("metrics", {})
             if isinstance(metrics_dict, dict):
