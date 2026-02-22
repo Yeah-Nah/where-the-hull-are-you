@@ -229,6 +229,8 @@ class UnlabeledEvaluator:
             writer = cv2.VideoWriter(
                 str(output_path), fourcc, fps, (props["width"], props["height"])
             )
+            if not writer.isOpened():
+                raise ValueError(f"Could not open video writer for: {output_path}")
 
         try:
             for frame_id, frame in enumerate(self._read_video(cap)):
@@ -249,6 +251,7 @@ class UnlabeledEvaluator:
         finally:
             if writer is not None:
                 writer.release()
+                logger.info(f"Annotated video saved to: {output_path}")
 
         cv2.destroyAllWindows()
 
@@ -283,7 +286,8 @@ class UnlabeledEvaluator:
             Number of frames to process at once
         save_annotated_video : bool
             If True, saves an annotated copy of the video with bounding boxes
-            to the configured annotated videos output directory
+            to the configured annotated videos output directory DEFAULT_ANNOTATED_VIDEOS_DIR
+            and saves with filename format <original_name>_annotated.mp4
 
         Returns
         -------
